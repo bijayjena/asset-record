@@ -1,0 +1,4 @@
+project_id = "fxnxbwdkqgtetxhmxvoq"
+
+[functions.search-gadget-image]
+verify_jwt = false

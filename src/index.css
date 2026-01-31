@@ -1,0 +1,249 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* AssetRecord Design System - Premium Tech Vault Aesthetic
+   Dark theme with teal/cyan accents, glassmorphism, and elegant typography
+*/
+
+@layer base {
+  :root {
+    /* Core colors - Light mode (unused but defined) */
+    --background: 210 20% 98%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 173 80% 40%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 173 80% 40%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 173 80% 40%;
+    --radius: 0.75rem;
+
+    /* Sidebar */
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5% 26%;
+    --sidebar-primary: 240 6% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 5% 96%;
+    --sidebar-accent-foreground: 240 6% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 173 80% 40%;
+
+    /* AssetRecord Custom Tokens */
+    --gv-gradient-start: 173 80% 40%;
+    --gv-gradient-end: 199 89% 48%;
+    --gv-success: 142 76% 36%;
+    --gv-warning: 38 92% 50%;
+    --gv-info: 199 89% 48%;
+    --gv-glass: 0 0% 100% / 0.1;
+    --gv-glow: 173 80% 40%;
+  }
+
+  .dark {
+    /* Dark theme - Primary palette */
+    --background: 222 47% 6%;
+    --foreground: 210 40% 96%;
+    
+    /* Cards with subtle glass effect */
+    --card: 222 47% 8%;
+    --card-foreground: 210 40% 96%;
+    
+    /* Popovers */
+    --popover: 222 47% 8%;
+    --popover-foreground: 210 40% 96%;
+    
+    /* Primary - Teal/Cyan accent */
+    --primary: 173 80% 45%;
+    --primary-foreground: 222 47% 6%;
+    
+    /* Secondary */
+    --secondary: 217 33% 14%;
+    --secondary-foreground: 210 40% 96%;
+    
+    /* Muted */
+    --muted: 217 33% 14%;
+    --muted-foreground: 215 20% 55%;
+    
+    /* Accent */
+    --accent: 173 80% 45%;
+    --accent-foreground: 222 47% 6%;
+    
+    /* Destructive */
+    --destructive: 0 63% 45%;
+    --destructive-foreground: 210 40% 98%;
+    
+    /* Borders & inputs */
+    --border: 217 33% 18%;
+    --input: 217 33% 18%;
+    --ring: 173 80% 45%;
+
+    /* Sidebar dark */
+    --sidebar-background: 222 47% 5%;
+    --sidebar-foreground: 210 40% 96%;
+    --sidebar-primary: 173 80% 45%;
+    --sidebar-primary-foreground: 222 47% 6%;
+    --sidebar-accent: 217 33% 12%;
+    --sidebar-accent-foreground: 210 40% 96%;
+    --sidebar-border: 217 33% 15%;
+    --sidebar-ring: 173 80% 45%;
+
+    /* AssetRecord Dark Custom */
+    --gv-gradient-start: 173 80% 45%;
+    --gv-gradient-end: 199 89% 48%;
+    --gv-success: 142 70% 45%;
+    --gv-warning: 38 92% 50%;
+    --gv-info: 199 89% 48%;
+    --gv-glass: 217 33% 15% / 0.6;
+    --gv-glow: 173 80% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    @apply dark;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight;
+  }
+}
+
+@layer components {
+  /* Glass card effect */
+  .glass-card {
+    @apply bg-card/60 backdrop-blur-xl border border-border/50 shadow-xl;
+    background: linear-gradient(
+      135deg,
+      hsl(var(--card) / 0.8) 0%,
+      hsl(var(--card) / 0.4) 100%
+    );
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(
+      135deg,
+      hsl(var(--gv-gradient-start)) 0%,
+      hsl(var(--gv-gradient-end)) 100%
+    );
+  }
+
+  /* Primary gradient button */
+  .btn-gradient {
+    @apply relative overflow-hidden transition-all duration-300;
+    background: linear-gradient(
+      135deg,
+      hsl(var(--gv-gradient-start)) 0%,
+      hsl(var(--gv-gradient-end)) 100%
+    );
+  }
+
+  .btn-gradient:hover {
+    box-shadow: 0 0 30px hsl(var(--gv-glow) / 0.4);
+    transform: translateY(-1px);
+  }
+
+  /* Glow effect */
+  .glow {
+    box-shadow: 0 0 40px hsl(var(--gv-glow) / 0.15);
+  }
+
+  /* Condition badges */
+  .condition-excellent {
+    @apply bg-emerald-500/20 text-emerald-400 border-emerald-500/30;
+  }
+
+  .condition-good {
+    @apply bg-sky-500/20 text-sky-400 border-sky-500/30;
+  }
+
+  .condition-okay {
+    @apply bg-amber-500/20 text-amber-400 border-amber-500/30;
+  }
+
+  .condition-bad {
+    @apply bg-red-500/20 text-red-400 border-red-500/30;
+  }
+
+  /* Age comparison indicators */
+  .age-younger {
+    @apply bg-emerald-500/20 text-emerald-400;
+  }
+
+  .age-average {
+    @apply bg-amber-500/20 text-amber-400;
+  }
+
+  .age-older {
+    @apply bg-red-500/20 text-red-400;
+  }
+
+  /* Warranty status */
+  .warranty-active {
+    @apply bg-emerald-500/20 text-emerald-400 border-emerald-500/30;
+  }
+
+  .warranty-expired {
+    @apply bg-red-500/20 text-red-400 border-red-500/30;
+  }
+
+  .warranty-expiring {
+    @apply bg-amber-500/20 text-amber-400 border-amber-500/30;
+  }
+
+  /* Stat card */
+  .stat-card {
+    @apply glass-card rounded-2xl p-6 transition-all duration-300 hover:border-primary/30;
+  }
+}
+
+@layer utilities {
+  /* Subtle noise texture */
+  .noise {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    opacity: 0.03;
+  }
+
+  /* Scrollbar styling */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: hsl(var(--muted));
+    border-radius: 3px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 3px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.5);
+  }
+}
