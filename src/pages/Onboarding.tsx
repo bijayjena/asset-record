@@ -104,8 +104,8 @@ const Onboarding = () => {
             <div
               key={s}
               className={`h-2 w-8 rounded-full transition-colors ${['welcome', 'profile', 'tutorial', 'demo-data', 'complete'].indexOf(step) >= i
-                  ? 'bg-primary'
-                  : 'bg-secondary'
+                ? 'bg-primary'
+                : 'bg-secondary'
                 }`}
             />
           ))}
@@ -129,7 +129,7 @@ const Onboarding = () => {
                 <div>
                   <h1 className="text-2xl font-bold mb-2">Welcome to AssetRecord!</h1>
                   <p className="text-muted-foreground">
-                    Let's set up your personal tech vault in just a few steps.
+                    Let's set up your personal asset record in just a few steps.
                   </p>
                 </div>
                 <Button
@@ -252,14 +252,14 @@ const Onboarding = () => {
                   <div className="w-16 h-16 mx-auto rounded-xl bg-primary/20 flex items-center justify-center mb-4">
                     <Package className="w-8 h-8 text-primary" />
                   </div>
-                  <h2 className="text-xl font-bold mb-1">Add sample gadgets?</h2>
+                  <h2 className="text-xl font-bold mb-1">Add sample assets?</h2>
                   <p className="text-sm text-muted-foreground">
-                    We can add a few example gadgets so you can see how the dashboard looks.
+                    We can add a few example assets so you can see how the dashboard looks.
                   </p>
                 </div>
 
                 <div className="glass-card p-4 space-y-2 text-sm">
-                  <p className="font-medium">Sample gadgets include:</p>
+                  <p className="font-medium">Sample assets include:</p>
                   <ul className="text-muted-foreground space-y-1 ml-4 list-disc">
                     <li>iPhone 13 (Phone)</li>
                     <li>MacBook Pro 14" (Laptop)</li>
@@ -300,7 +300,7 @@ const Onboarding = () => {
                 <div>
                   <h2 className="text-xl font-bold mb-1">You're all set, {fullName.split(' ')[0]}!</h2>
                   <p className="text-sm text-muted-foreground">
-                    Your AssetRecord is ready. Let's start tracking your tech!
+                    Your AssetRecord is ready. Let's start tracking your assets!
                   </p>
                 </div>
 
