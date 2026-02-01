@@ -18,18 +18,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { 
-  Gadget, 
-  calculateAge, 
+import {
+  Gadget,
+  calculateAge,
   GadgetCategory,
   getCategoryLabel,
 } from '@/types/gadget';
 import { Currency } from '@/lib/currency';
 import { exportGadgetsToCSV, downloadCSV } from '@/lib/csv-export';
 import { toast } from 'sonner';
-import { 
-  Plus, 
-  Search, 
+import {
+  Plus,
+  Search,
   Filter,
   SortAsc,
   SortDesc,
@@ -39,8 +39,10 @@ import {
 } from 'lucide-react';
 
 const CATEGORY_OPTIONS: GadgetCategory[] = [
-  'phone', 'laptop', 'tablet', 'watch', 'headphones', 
-  'tv', 'gaming', 'camera', 'speaker', 'wearable', 'other'
+  'phone', 'laptop', 'tablet', 'watch', 'headphones',
+  'tv', 'gaming', 'camera', 'speaker', 'wearable',
+  'vehicle', 'real_estate', 'furniture', 'appliance',
+  'valuable', 'collectible', 'other'
 ];
 
 // Static global averages (hardcoded for demo)
@@ -55,6 +57,12 @@ const GLOBAL_AVERAGES: Record<GadgetCategory, number> = {
   camera: 42,
   speaker: 30,
   wearable: 18,
+  vehicle: 120, // 10 years
+  real_estate: 360, // 30 years
+  furniture: 120, // 10 years
+  appliance: 84, // 7 years
+  valuable: 120,
+  collectible: 120,
   other: 24,
 };
 
@@ -62,7 +70,7 @@ const Dashboard = () => {
   const { user, loading: authLoading } = useAuth();
   const { profile } = useProfile();
   const navigate = useNavigate();
-  
+
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [warrantyFilter, setWarrantyFilter] = useState<string>('all');
@@ -83,14 +91,14 @@ const Dashboard = () => {
 
   const handleExportCSV = () => {
     if (gadgets.length === 0) {
-      toast.error('No gadgets to export');
+      toast.error('No assets to export');
       return;
     }
     const currency = (profile?.currency as Currency) || 'USD';
     const csvContent = exportGadgetsToCSV(gadgets, currency);
     const date = new Date().toISOString().split('T')[0];
-    downloadCSV(csvContent, `gadgetvault-export-${date}.csv`);
-    toast.success(`Exported ${gadgets.length} gadget${gadgets.length !== 1 ? 's' : ''} to CSV`);
+    downloadCSV(csvContent, `asset-record-export-${date}.csv`);
+    toast.success(`Exported ${gadgets.length} asset${gadgets.length !== 1 ? 's' : ''} to CSV`);
   };
 
   // Calculate category averages from user's data
@@ -119,28 +127,28 @@ const Dashboard = () => {
       // Search filter
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
-        const matches = 
+        const matches =
           gadget.name.toLowerCase().includes(query) ||
           gadget.brand.toLowerCase().includes(query) ||
           (gadget.model?.toLowerCase().includes(query) || false);
         if (!matches) return false;
       }
-      
+
       // Category filter
       if (categoryFilter !== 'all' && gadget.category !== categoryFilter) {
         return false;
       }
-      
+
       // Warranty filter
       if (warrantyFilter !== 'all') {
         const hasWarranty = !!gadget.warranty_expiry;
         const isExpired = hasWarranty && new Date(gadget.warranty_expiry!) < new Date();
-        
+
         if (warrantyFilter === 'active' && (!hasWarranty || isExpired)) return false;
         if (warrantyFilter === 'expired' && !isExpired) return false;
         if (warrantyFilter === 'none' && hasWarranty) return false;
       }
-      
+
       return true;
     })
     .sort((a, b) => {
@@ -164,7 +172,7 @@ const Dashboard = () => {
         <div>
           <h1 className="text-3xl font-bold">Dashboard</h1>
           <p className="text-muted-foreground mt-1">
-            Manage your tech collection
+            Manage your entire asset collection
           </p>
         </div>
 
@@ -174,8 +182,8 @@ const Dashboard = () => {
         {/* Gadgets Grid Section */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">Your Gadgets</h2>
-            
+            <h2 className="text-xl font-semibold">Your Assets</h2>
+
             <div className="flex items-center gap-4">
               {/* Export button */}
               <Button
@@ -209,13 +217,13 @@ const Dashboard = () => {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Search gadgets..."
+                placeholder="Search assets..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10 bg-secondary/50 border-border/50"
               />
             </div>
-            
+
             <Select value={categoryFilter} onValueChange={setCategoryFilter}>
               <SelectTrigger className="w-full sm:w-40 bg-secondary/50 border-border/50">
                 <Filter className="w-4 h-4 mr-2 text-muted-foreground" />
@@ -280,16 +288,16 @@ const Dashboard = () => {
                   <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-primary/20 flex items-center justify-center">
                     <Plus className="w-8 h-8 text-primary" />
                   </div>
-                  <h3 className="text-lg font-semibold mb-2">No gadgets yet</h3>
+                  <h3 className="text-lg font-semibold mb-2">No assets yet</h3>
                   <p className="text-muted-foreground mb-4">
-                    Start building your tech vault by adding your first gadget
+                    Start building your inventory by adding your first asset
                   </p>
                   <Button
-                    onClick={() => navigate('/gadgets/new')}
+                    onClick={() => navigate('/assets/new')}
                     className="btn-gradient text-primary-foreground"
                   >
                     <Plus className="w-4 h-4 mr-2" />
-                    Add Your First Gadget
+                    Add Your First Asset
                   </Button>
                 </>
               ) : (
@@ -297,7 +305,7 @@ const Dashboard = () => {
                   <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-secondary flex items-center justify-center">
                     <Search className="w-8 h-8 text-muted-foreground" />
                   </div>
-                  <h3 className="text-lg font-semibold mb-2">No matching gadgets</h3>
+                  <h3 className="text-lg font-semibold mb-2">No matching assets</h3>
                   <p className="text-muted-foreground">
                     Try adjusting your search or filters
                   </p>

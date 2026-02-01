@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { 
-  Gadget, 
-  formatAge, 
-  getCategoryIcon, 
+import {
+  Gadget,
+  formatAge,
+  getCategoryIcon,
   getCategoryLabel,
   getConditionLabel,
   getWarrantyStatus,
@@ -24,7 +24,7 @@ const GadgetCard = ({ gadget, categoryAverageAge, index = 0 }: GadgetCardProps) 
   const navigate = useNavigate();
   const warrantyStatus = getWarrantyStatus(gadget.warranty_expiry);
   const { totalMonths } = calculateAge(gadget.purchase_date);
-  
+
   // Age comparison
   let ageComparison: 'younger' | 'average' | 'older' = 'average';
   if (categoryAverageAge !== undefined) {
@@ -42,16 +42,16 @@ const GadgetCard = ({ gadget, categoryAverageAge, index = 0 }: GadgetCardProps) 
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05, duration: 0.3 }}
     >
-      <Card 
+      <Card
         className="glass-card p-5 hover:border-primary/30 transition-all duration-300 cursor-pointer group"
-        onClick={() => navigate(`/gadgets/${gadget.id}`)}
+        onClick={() => navigate(`/assets/${gadget.id}`)}
       >
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-3">
             {gadget.image_url ? (
               <div className="w-12 h-12 rounded-xl overflow-hidden bg-secondary/50 flex-shrink-0">
-                <img 
-                  src={gadget.image_url} 
+                <img
+                  src={gadget.image_url}
                   alt={gadget.name}
                   className="w-full h-full object-cover"
                   onError={(e) => {
@@ -106,7 +106,7 @@ const GadgetCard = ({ gadget, categoryAverageAge, index = 0 }: GadgetCardProps) 
             <Badge variant="outline" className={`${conditionClass} text-xs`}>
               {getConditionLabel(gadget.condition)}
             </Badge>
-            
+
             {warrantyStatus !== 'none' && (
               <Badge variant="outline" className={`${warrantyClass} text-xs`}>
                 <Shield className="w-3 h-3 mr-1" />
@@ -118,8 +118,8 @@ const GadgetCard = ({ gadget, categoryAverageAge, index = 0 }: GadgetCardProps) 
           </div>
 
           {/* View details button */}
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             className="w-full mt-2 group-hover:bg-primary/10 group-hover:text-primary transition-colors"
           >
             View Details

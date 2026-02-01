@@ -68,8 +68,8 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                     key={item.path}
                     to={item.path}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isActive
-                        ? 'bg-primary/10 text-primary'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
+                      ? 'bg-primary/10 text-primary'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
                       }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -82,11 +82,11 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             {/* Right side */}
             <div className="flex items-center gap-3">
               <Button
-                onClick={() => navigate('/gadgets/new')}
+                onClick={() => navigate('/assets/new')}
                 className="btn-gradient text-primary-foreground gap-2"
               >
                 <Plus className="w-4 h-4" />
-                <span className="hidden sm:inline">Add Gadget</span>
+                <span className="hidden sm:inline">Add Asset</span>
               </Button>
 
               <DropdownMenu>

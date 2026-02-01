@@ -1,14 +1,20 @@
-export type GadgetCategory = 
-  | 'phone' 
-  | 'laptop' 
-  | 'tablet' 
-  | 'watch' 
-  | 'headphones' 
-  | 'tv' 
-  | 'gaming' 
-  | 'camera' 
-  | 'speaker' 
-  | 'wearable' 
+export type GadgetCategory =
+  | 'phone'
+  | 'laptop'
+  | 'tablet'
+  | 'watch'
+  | 'headphones'
+  | 'tv'
+  | 'gaming'
+  | 'camera'
+  | 'speaker'
+  | 'wearable'
+  | 'vehicle'
+  | 'real_estate'
+  | 'furniture'
+  | 'appliance'
+  | 'valuable'
+  | 'collectible'
   | 'other';
 
 export type GadgetCondition = 'excellent' | 'good' | 'okay' | 'bad';
@@ -77,25 +83,25 @@ export interface CategoryStats {
 export const calculateAge = (purchaseDate: string): { years: number; months: number; totalMonths: number } => {
   const purchase = new Date(purchaseDate);
   const now = new Date();
-  
+
   let years = now.getFullYear() - purchase.getFullYear();
   let months = now.getMonth() - purchase.getMonth();
-  
+
   if (months < 0) {
     years--;
     months += 12;
   }
-  
+
   return { years, months, totalMonths: years * 12 + months };
 };
 
 export const formatAge = (purchaseDate: string): string => {
   const { years, months } = calculateAge(purchaseDate);
-  
+
   if (years === 0 && months === 0) return 'Brand new';
   if (years === 0) return `${months} month${months !== 1 ? 's' : ''} old`;
   if (months === 0) return `${years} year${years !== 1 ? 's' : ''} old`;
-  
+
   return `${years} year${years !== 1 ? 's' : ''} ${months} month${months !== 1 ? 's' : ''} old`;
 };
 
@@ -111,9 +117,15 @@ export const getCategoryIcon = (category: GadgetCategory): string => {
     camera: '📷',
     speaker: '🔊',
     wearable: '⌚',
-    other: '🔧',
+    vehicle: '🚗',
+    real_estate: '🏠',
+    furniture: '🪑',
+    appliance: '🧺',
+    valuable: '💎',
+    collectible: '🏺',
+    other: '📦',
   };
-  return icons[category];
+  return icons[category] || '📦';
 };
 
 export const getCategoryLabel = (category: GadgetCategory): string => {
@@ -128,9 +140,15 @@ export const getCategoryLabel = (category: GadgetCategory): string => {
     camera: 'Camera',
     speaker: 'Speaker',
     wearable: 'Wearable',
+    vehicle: 'Vehicle',
+    real_estate: 'Real Estate',
+    furniture: 'Furniture',
+    appliance: 'Appliance',
+    valuable: 'Valuable',
+    collectible: 'Collectible',
     other: 'Other',
   };
-  return labels[category];
+  return labels[category] || 'Other';
 };
 
 export const getConditionLabel = (condition: GadgetCondition): string => {
@@ -145,11 +163,11 @@ export const getConditionLabel = (condition: GadgetCondition): string => {
 
 export const getWarrantyStatus = (warrantyExpiry: string | null): 'active' | 'expired' | 'expiring' | 'none' => {
   if (!warrantyExpiry) return 'none';
-  
+
   const expiry = new Date(warrantyExpiry);
   const now = new Date();
   const thirtyDaysFromNow = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
-  
+
   if (expiry < now) return 'expired';
   if (expiry <= thirtyDaysFromNow) return 'expiring';
   return 'active';

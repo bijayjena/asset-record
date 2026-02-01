@@ -22,9 +22,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { 
-  fetchGadgetById, 
-  updateGadget, 
+import {
+  fetchGadgetById,
+  updateGadget,
   deleteGadget,
   fetchAttachments,
   fetchAISuggestion,
@@ -35,11 +35,11 @@ import {
 import { getCategoryIcon, formatAge } from '@/types/gadget';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
-import { 
-  ArrowLeft, 
-  Edit3, 
-  Trash2, 
-  Paperclip, 
+import {
+  ArrowLeft,
+  Edit3,
+  Trash2,
+  Paperclip,
   Sparkles,
   Info,
   Loader2,
@@ -54,7 +54,7 @@ const GadgetDetails = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user, loading: authLoading } = useAuth();
-  
+
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -94,7 +94,7 @@ const GadgetDetails = () => {
 
     // Validation
     if (!formData.name.trim()) {
-      toast.error('Please enter a gadget name');
+      toast.error('Please enter an asset name');
       return;
     }
     if (!formData.brand.trim()) {
@@ -123,13 +123,13 @@ const GadgetDetails = () => {
         notes: formData.notes.trim() || null,
       });
 
-      toast.success('Gadget updated successfully!');
+      toast.success('Asset updated successfully!');
       setIsEditing(false);
       queryClient.invalidateQueries({ queryKey: ['gadget', id] });
       queryClient.invalidateQueries({ queryKey: ['gadgets'] });
     } catch (error) {
-      console.error('Error updating gadget:', error);
-      toast.error('Failed to update gadget. Please try again.');
+      console.error('Error updating asset:', error);
+      toast.error('Failed to update asset. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -141,12 +141,12 @@ const GadgetDetails = () => {
     setDeleting(true);
     try {
       await deleteGadget(id);
-      toast.success('Gadget deleted successfully!');
+      toast.success('Asset deleted successfully!');
       queryClient.invalidateQueries({ queryKey: ['gadgets'] });
       navigate('/dashboard');
     } catch (error) {
-      console.error('Error deleting gadget:', error);
-      toast.error('Failed to delete gadget. Please try again.');
+      console.error('Error deleting asset:', error);
+      toast.error('Failed to delete asset. Please try again.');
     } finally {
       setDeleting(false);
       setShowDeleteDialog(false);
@@ -155,17 +155,17 @@ const GadgetDetails = () => {
 
   const handleImageUpload = async (file: File | null) => {
     if (!file || !gadget || !user) return;
-    
+
     setUploadingImage(true);
     try {
       // Delete old image if it's a custom upload
       if (gadget.image_url && gadget.image_url.includes('gadget-attachments')) {
         await deleteGadgetImage(gadget.image_url);
       }
-      
+
       const imageUrl = await uploadGadgetImage(gadget.id, file, user.id);
       await updateGadget(gadget.id, { image_url: imageUrl });
-      
+
       toast.success('Image updated successfully!');
       queryClient.invalidateQueries({ queryKey: ['gadget', id] });
       queryClient.invalidateQueries({ queryKey: ['gadgets'] });
@@ -180,7 +180,7 @@ const GadgetDetails = () => {
 
   const handleRefetchImage = async () => {
     if (!gadget) return;
-    
+
     setUploadingImage(true);
     try {
       const imageUrl = await searchGadgetImage(gadget.name, gadget.brand, gadget.category);
@@ -189,13 +189,13 @@ const GadgetDetails = () => {
         if (gadget.image_url && gadget.image_url.includes('gadget-attachments')) {
           await deleteGadgetImage(gadget.image_url);
         }
-        
+
         await updateGadget(gadget.id, { image_url: imageUrl });
         toast.success('Image refreshed from web!');
         queryClient.invalidateQueries({ queryKey: ['gadget', id] });
         queryClient.invalidateQueries({ queryKey: ['gadgets'] });
       } else {
-        toast.error('No image found for this gadget');
+        toast.error('No image found for this asset');
       }
       setShowImageEditor(false);
     } catch (error) {
@@ -208,13 +208,13 @@ const GadgetDetails = () => {
 
   const handleRemoveImage = async () => {
     if (!gadget) return;
-    
+
     setUploadingImage(true);
     try {
       if (gadget.image_url && gadget.image_url.includes('gadget-attachments')) {
         await deleteGadgetImage(gadget.image_url);
       }
-      
+
       await updateGadget(gadget.id, { image_url: null });
       toast.success('Image removed!');
       queryClient.invalidateQueries({ queryKey: ['gadget', id] });
@@ -240,9 +240,9 @@ const GadgetDetails = () => {
     return (
       <DashboardLayout>
         <div className="text-center py-16">
-          <h2 className="text-xl font-semibold mb-2">Gadget not found</h2>
+          <h2 className="text-xl font-semibold mb-2">Asset not found</h2>
           <p className="text-muted-foreground mb-4">
-            The gadget you're looking for doesn't exist or has been deleted.
+            The asset you're looking for doesn't exist or has been deleted.
           </p>
           <Button onClick={() => navigate('/dashboard')}>
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -323,7 +323,7 @@ const GadgetDetails = () => {
                 <Camera className="w-6 h-6 text-white" />
               </button>
             </div>
-            
+
             <div className="flex-1">
               <h1 className="text-2xl font-bold">{gadget.name}</h1>
               <p className="text-muted-foreground">
@@ -384,7 +384,7 @@ const GadgetDetails = () => {
             >
               <Card className="glass-card p-6">
                 <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-semibold">Edit Gadget</h2>
+                  <h2 className="text-xl font-semibold">Edit Asset</h2>
                   <Button
                     variant="ghost"
                     size="icon"
@@ -467,7 +467,7 @@ const GadgetDetails = () => {
             <AlertDialogHeader>
               <AlertDialogTitle>Delete "{gadget.name}"?</AlertDialogTitle>
               <AlertDialogDescription>
-                This will permanently delete this gadget and all its attachments. This action cannot be undone.
+                This will permanently delete this asset and all its attachments. This action cannot be undone.
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
@@ -483,7 +483,7 @@ const GadgetDetails = () => {
                     Deleting...
                   </>
                 ) : (
-                  'Delete Gadget'
+                  'Delete Asset'
                 )}
               </AlertDialogAction>
             </AlertDialogFooter>

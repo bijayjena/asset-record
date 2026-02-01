@@ -16,9 +16,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { 
+import {
   Gadget,
-  GadgetCategory, 
+  GadgetCategory,
   GadgetCondition,
   getCategoryLabel,
   getConditionLabel,
@@ -30,7 +30,9 @@ import { cn } from '@/lib/utils';
 
 const CATEGORIES: GadgetCategory[] = [
   'phone', 'laptop', 'tablet', 'watch', 'headphones',
-  'tv', 'gaming', 'camera', 'speaker', 'wearable', 'other'
+  'tv', 'gaming', 'camera', 'speaker', 'wearable',
+  'vehicle', 'real_estate', 'furniture', 'appliance',
+  'valuable', 'collectible', 'other'
 ];
 
 const CONDITIONS: GadgetCondition[] = ['excellent', 'good', 'okay', 'bad'];
@@ -57,11 +59,11 @@ interface GadgetFormProps {
   isLoading?: boolean;
 }
 
-export const GadgetForm = ({ 
-  initialData, 
-  onSubmit, 
-  submitLabel = 'Save Gadget',
-  isLoading = false 
+export const GadgetForm = ({
+  initialData,
+  onSubmit,
+  submitLabel = 'Save Asset',
+  isLoading = false
 }: GadgetFormProps) => {
   const [name, setName] = useState(initialData?.name || '');
   const [category, setCategory] = useState<GadgetCategory>(initialData?.category || 'phone');
@@ -140,10 +142,10 @@ export const GadgetForm = ({
 
       {/* Name */}
       <div className="space-y-2">
-        <Label htmlFor="name">Gadget Name *</Label>
+        <Label htmlFor="name">Asset Name *</Label>
         <Input
           id="name"
-          placeholder="e.g., iPhone 15 Pro"
+          placeholder="e.g., iPhone 15 Pro, Tesla Model 3"
           value={name}
           onChange={(e) => setName(e.target.value)}
           className="bg-secondary/50"
@@ -156,7 +158,7 @@ export const GadgetForm = ({
           <Label htmlFor="brand">Brand *</Label>
           <Input
             id="brand"
-            placeholder="e.g., Apple"
+            placeholder="e.g., Apple, Tesla"
             value={brand}
             onChange={(e) => setBrand(e.target.value)}
             className="bg-secondary/50"
@@ -166,7 +168,7 @@ export const GadgetForm = ({
           <Label htmlFor="model">Model</Label>
           <Input
             id="model"
-            placeholder="e.g., A3096"
+            placeholder="e.g., A3096, Long Range"
             value={model}
             onChange={(e) => setModel(e.target.value)}
             className="bg-secondary/50"
@@ -198,6 +200,9 @@ export const GadgetForm = ({
                 onSelect={setPurchaseDate}
                 initialFocus
                 disabled={(date) => date > new Date()}
+                captionLayout="dropdown-buttons"
+                fromYear={1900}
+                toYear={new Date().getFullYear()}
               />
             </PopoverContent>
           </Popover>
@@ -224,6 +229,9 @@ export const GadgetForm = ({
                 selected={warrantyExpiry}
                 onSelect={setWarrantyExpiry}
                 initialFocus
+                captionLayout="dropdown-buttons"
+                fromYear={1900}
+                toYear={new Date().getFullYear() + 20}
               />
             </PopoverContent>
           </Popover>
@@ -248,7 +256,7 @@ export const GadgetForm = ({
           <Label htmlFor="vendor">Vendor/Store</Label>
           <Input
             id="vendor"
-            placeholder="e.g., Apple Store"
+            placeholder="e.g., Apple Store, Dealership"
             value={vendorName}
             onChange={(e) => setVendorName(e.target.value)}
             className="bg-secondary/50"
@@ -269,7 +277,7 @@ export const GadgetForm = ({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="serial">Serial Number</Label>
+          <Label htmlFor="serial">Serial Number/VIN</Label>
           <Input
             id="serial"
             placeholder="Optional"
@@ -285,7 +293,7 @@ export const GadgetForm = ({
         <Label htmlFor="notes">Notes</Label>
         <Textarea
           id="notes"
-          placeholder="Any additional notes about this gadget..."
+          placeholder="Any additional notes about this asset..."
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
           className="bg-secondary/50 min-h-[100px]"

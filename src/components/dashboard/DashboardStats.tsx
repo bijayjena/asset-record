@@ -1,18 +1,18 @@
 import { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
-import { 
-  Gadget, 
-  calculateAge, 
-  getCategoryIcon, 
+import {
+  Gadget,
+  calculateAge,
+  getCategoryIcon,
   getCategoryLabel,
   getWarrantyStatus,
   GadgetCategory,
 } from '@/types/gadget';
-import { 
-  Cpu, 
-  Clock, 
-  AlertTriangle, 
+import {
+  Cpu,
+  Clock,
+  AlertTriangle,
   TrendingUp,
   BarChart3,
 } from 'lucide-react';
@@ -53,9 +53,9 @@ const DashboardStats = ({ gadgets }: DashboardStatsProps) => {
     const averageAge = totalAge / gadgets.length;
 
     // Oldest gadget
-    const oldestGadget = gadgetsWithAge.reduce((oldest, g) => 
+    const oldestGadget = gadgetsWithAge.reduce((oldest, g) =>
       g.ageMonths > (oldest?.ageMonths || 0) ? g : oldest
-    , gadgetsWithAge[0]);
+      , gadgetsWithAge[0]);
 
     // Warranties expiring soon
     const expiringWarranties = gadgets.filter(
@@ -121,7 +121,7 @@ const DashboardStats = ({ gadgets }: DashboardStatsProps) => {
               <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
                 <Cpu className="w-5 h-5 text-primary" />
               </div>
-              <span className="text-sm text-muted-foreground">Total Gadgets</span>
+              <span className="text-sm text-muted-foreground">Total Assets</span>
             </div>
             <div className="text-3xl font-bold">{stats.totalGadgets}</div>
           </Card>
@@ -155,7 +155,7 @@ const DashboardStats = ({ gadgets }: DashboardStatsProps) => {
               <div className="w-10 h-10 rounded-xl bg-gv-warning/20 flex items-center justify-center">
                 <TrendingUp className="w-5 h-5 text-gv-warning" />
               </div>
-              <span className="text-sm text-muted-foreground">Oldest Device</span>
+              <span className="text-sm text-muted-foreground">Oldest Asset</span>
             </div>
             <div className="text-lg font-bold truncate">
               {stats.oldestGadget?.name || '-'}
@@ -175,12 +175,10 @@ const DashboardStats = ({ gadgets }: DashboardStatsProps) => {
         >
           <Card className={`stat-card ${stats.expiringWarranties.length > 0 ? 'border-gv-warning/50' : ''}`}>
             <div className="flex items-center gap-3 mb-3">
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                stats.expiringWarranties.length > 0 ? 'bg-gv-warning/20' : 'bg-gv-success/20'
-              }`}>
-                <AlertTriangle className={`w-5 h-5 ${
-                  stats.expiringWarranties.length > 0 ? 'text-gv-warning' : 'text-gv-success'
-                }`} />
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${stats.expiringWarranties.length > 0 ? 'bg-gv-warning/20' : 'bg-gv-success/20'
+                }`}>
+                <AlertTriangle className={`w-5 h-5 ${stats.expiringWarranties.length > 0 ? 'text-gv-warning' : 'text-gv-success'
+                  }`} />
               </div>
               <span className="text-sm text-muted-foreground">Warranties Expiring</span>
             </div>
@@ -209,18 +207,18 @@ const DashboardStats = ({ gadgets }: DashboardStatsProps) => {
                 <BarChart3 className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <h3 className="font-semibold">Gadgets by Category</h3>
+                <h3 className="font-semibold">Assets by Category</h3>
                 <p className="text-sm text-muted-foreground">Distribution and average age</p>
               </div>
             </div>
-            
+
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={stats.categoryData} layout="vertical">
                   <XAxis type="number" hide />
-                  <YAxis 
-                    type="category" 
-                    dataKey="category" 
+                  <YAxis
+                    type="category"
+                    dataKey="category"
                     width={100}
                     tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
                     axisLine={false}
@@ -234,7 +232,7 @@ const DashboardStats = ({ gadgets }: DashboardStatsProps) => {
                           <div className="glass-card rounded-lg px-3 py-2 text-sm">
                             <p className="font-medium">{data.icon} {data.category}</p>
                             <p className="text-muted-foreground">
-                              {data.count} gadget{data.count !== 1 ? 's' : ''} • Avg: {formatAgeDisplay(data.avgAge)}
+                              {data.count} asset{data.count !== 1 ? 's' : ''} • Avg: {formatAgeDisplay(data.avgAge)}
                             </p>
                           </div>
                         );
@@ -244,8 +242,8 @@ const DashboardStats = ({ gadgets }: DashboardStatsProps) => {
                   />
                   <Bar dataKey="count" radius={[0, 4, 4, 0]}>
                     {stats.categoryData.map((_, index) => (
-                      <Cell 
-                        key={`cell-${index}`} 
+                      <Cell
+                        key={`cell-${index}`}
                         fill={chartColors[index % chartColors.length]}
                         opacity={0.8}
                       />

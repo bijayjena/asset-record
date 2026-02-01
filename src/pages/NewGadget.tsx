@@ -23,8 +23,8 @@ import {
 } from '@/components/ui/popover';
 import { GadgetImageUpload } from '@/components/gadgets/GadgetImageUpload';
 import { createGadget, searchGadgetImage, uploadGadgetImage } from '@/lib/supabase-helpers';
-import { 
-  GadgetCategory, 
+import {
+  GadgetCategory,
   GadgetCondition,
   getCategoryLabel,
   getConditionLabel,
@@ -32,9 +32,9 @@ import {
 } from '@/types/gadget';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
-import { 
-  ArrowLeft, 
-  CalendarIcon, 
+import {
+  ArrowLeft,
+  CalendarIcon,
   Save,
   Loader2,
 } from 'lucide-react';
@@ -42,7 +42,9 @@ import { cn } from '@/lib/utils';
 
 const CATEGORIES: GadgetCategory[] = [
   'phone', 'laptop', 'tablet', 'watch', 'headphones',
-  'tv', 'gaming', 'camera', 'speaker', 'wearable', 'other'
+  'tv', 'gaming', 'camera', 'speaker', 'wearable',
+  'vehicle', 'real_estate', 'furniture', 'appliance',
+  'valuable', 'collectible', 'other'
 ];
 
 const CONDITIONS: GadgetCondition[] = ['excellent', 'good', 'okay', 'bad'];
@@ -51,7 +53,7 @@ const NewGadget = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [saving, setSaving] = useState(false);
-  
+
   // Form state
   const [name, setName] = useState('');
   const [category, setCategory] = useState<GadgetCategory>('phone');
@@ -75,16 +77,16 @@ const NewGadget = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!user) return;
-    
+
     // Validation
     if (!name.trim()) {
-      toast.error('Please enter a gadget name');
+      toast.error('Please enter an asset name');
       return;
     }
     if (!brand.trim()) {
-      toast.error('Please enter a brand');
+      toast.error('Please enter a brand/manufacturer');
       return;
     }
     if (!purchaseDate) {
@@ -93,9 +95,9 @@ const NewGadget = () => {
     }
 
     setSaving(true);
-    
+
     try {
-      // Create the gadget first (without image)
+      // Create the gadget (asset) first (without image)
       const gadget = await createGadget({
         user_id: user.id,
         name: name.trim(),
@@ -115,14 +117,14 @@ const NewGadget = () => {
 
       // Handle image: custom upload or auto-fetch
       let imageUrl: string | null = null;
-      
+
       if (customImageFile) {
         // Upload custom image
         try {
           imageUrl = await uploadGadgetImage(gadget.id, customImageFile, user.id);
         } catch (err) {
           console.error('Failed to upload custom image:', err);
-          toast.error('Failed to upload image, but gadget was created');
+          toast.error('Failed to upload image, but asset was created');
         }
       } else {
         // Auto-fetch from Google
@@ -134,12 +136,12 @@ const NewGadget = () => {
         const { updateGadget } = await import('@/lib/supabase-helpers');
         await updateGadget(gadget.id, { image_url: imageUrl });
       }
-      
-      toast.success('Gadget added successfully!');
-      navigate(`/gadgets/${gadget.id}`);
+
+      toast.success('Asset added successfully!');
+      navigate(`/assets/${gadget.id}`);
     } catch (error) {
-      console.error('Error creating gadget:', error);
-      toast.error('Failed to create gadget. Please try again.');
+      console.error('Error creating asset:', error);
+      toast.error('Failed to create asset. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -165,16 +167,16 @@ const NewGadget = () => {
 
         <Card className="glass-card p-6 sm:p-8">
           <div className="mb-6">
-            <h1 className="text-2xl font-bold">Add New Gadget</h1>
+            <h1 className="text-2xl font-bold">Add New Asset</h1>
             <p className="text-muted-foreground mt-1">
-              Fill in the details of your new device
+              Fill in the details of your new asset
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Image Upload */}
             <div className="space-y-2">
-              <Label>Gadget Image</Label>
+              <Label>Asset Image</Label>
               <GadgetImageUpload
                 currentImageUrl={null}
                 categoryIcon={getCategoryIcon(category)}
@@ -224,10 +226,10 @@ const NewGadget = () => {
 
             {/* Name */}
             <div className="space-y-2">
-              <Label htmlFor="name">Gadget Name *</Label>
+              <Label htmlFor="name">Asset Name *</Label>
               <Input
                 id="name"
-                placeholder="e.g., iPhone 15 Pro"
+                placeholder="e.g., Tesla Model 3, Eames Chair"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="bg-secondary/50"
@@ -240,7 +242,7 @@ const NewGadget = () => {
                 <Label htmlFor="brand">Brand *</Label>
                 <Input
                   id="brand"
-                  placeholder="e.g., Apple"
+                  placeholder="e.g., Apple, Tesla, Herman Miller"
                   value={brand}
                   onChange={(e) => setBrand(e.target.value)}
                   className="bg-secondary/50"
@@ -250,7 +252,7 @@ const NewGadget = () => {
                 <Label htmlFor="model">Model</Label>
                 <Input
                   id="model"
-                  placeholder="e.g., A3096"
+                  placeholder="e.g., Long Range, Aeron"
                   value={model}
                   onChange={(e) => setModel(e.target.value)}
                   className="bg-secondary/50"
@@ -282,6 +284,9 @@ const NewGadget = () => {
                       onSelect={setPurchaseDate}
                       initialFocus
                       disabled={(date) => date > new Date()}
+                      captionLayout="dropdown-buttons"
+                      fromYear={1900}
+                      toYear={new Date().getFullYear()}
                     />
                   </PopoverContent>
                 </Popover>
@@ -308,6 +313,9 @@ const NewGadget = () => {
                       selected={warrantyExpiry}
                       onSelect={setWarrantyExpiry}
                       initialFocus
+                      captionLayout="dropdown-buttons"
+                      fromYear={1900}
+                      toYear={new Date().getFullYear() + 20}
                     />
                   </PopoverContent>
                 </Popover>
@@ -332,7 +340,7 @@ const NewGadget = () => {
                 <Label htmlFor="vendor">Vendor/Store</Label>
                 <Input
                   id="vendor"
-                  placeholder="e.g., Apple Store"
+                  placeholder="e.g., Apple Store, Dealership"
                   value={vendorName}
                   onChange={(e) => setVendorName(e.target.value)}
                   className="bg-secondary/50"
@@ -353,7 +361,7 @@ const NewGadget = () => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="serial">Serial Number</Label>
+                <Label htmlFor="serial">Serial Number/VIN</Label>
                 <Input
                   id="serial"
                   placeholder="Optional"
@@ -369,7 +377,7 @@ const NewGadget = () => {
               <Label htmlFor="notes">Notes</Label>
               <Textarea
                 id="notes"
-                placeholder="Any additional notes about this gadget..."
+                placeholder="Any additional notes about this asset..."
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 className="bg-secondary/50 min-h-[100px]"
@@ -390,7 +398,7 @@ const NewGadget = () => {
               ) : (
                 <>
                   <Save className="w-4 h-4 mr-2" />
-                  Save Gadget
+                  Save Asset
                 </>
               )}
             </Button>

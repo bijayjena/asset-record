@@ -27,37 +27,37 @@ const App = () => (
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/onboarding" element={<Onboarding />} />
-            <Route 
-              path="/dashboard" 
+            <Route
+              path="/dashboard"
               element={
                 <ProtectedRoute>
                   <Dashboard />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/gadgets/new" 
+            <Route
+              path="/assets/new"
               element={
                 <ProtectedRoute>
                   <NewGadget />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/gadgets/:id" 
+            <Route
+              path="/assets/:id"
               element={
                 <ProtectedRoute>
                   <GadgetDetails />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="/settings" 
+            <Route
+              path="/settings"
               element={
                 <ProtectedRoute>
                   <Settings />
                 </ProtectedRoute>
-              } 
+              }
             />
             <Route path="*" element={<NotFound />} />
           </Routes>
