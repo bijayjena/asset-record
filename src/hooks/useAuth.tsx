@@ -27,13 +27,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
-        
-        // Create profile for new users (onboarding handles demo data now)
-        if (event === 'SIGNED_IN' && session?.user) {
-          setTimeout(() => {
-            ensureProfileExists(session.user.id);
-          }, 0);
-        }
+
+
       }
     );
 
@@ -47,28 +42,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const ensureProfileExists = async (userId: string) => {
-    try {
-      const { data } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('user_id', userId)
-        .single();
-      
-      if (!data) {
-        await supabase
-          .from('profiles')
-          .insert({ user_id: userId });
-      }
-    } catch (error) {
-      // Profile might already exist, that's fine
-      console.log('Profile check:', error);
-    }
-  };
+
 
   const signUp = async (email: string, password: string) => {
     const redirectUrl = `${window.location.origin}/`;
-    
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -76,7 +54,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         emailRedirectTo: redirectUrl,
       },
     });
-    
+
     return { error: error as Error | null };
   };
 
@@ -85,7 +63,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       email,
       password,
     });
-    
+
     return { error: error as Error | null };
   };
 

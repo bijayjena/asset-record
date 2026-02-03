@@ -18,7 +18,7 @@ export const getCurrencySymbol = (currency: Currency): string => {
   return found?.symbol || '$';
 };
 
-export const formatPrice = (amount: number | null, currency: Currency = 'USD'): string => {
+export const formatPrice = (amount: number | null, currency: Currency = 'INR'): string => {
   if (amount === null || amount === undefined) return '';
   
   const symbol = getCurrencySymbol(currency);

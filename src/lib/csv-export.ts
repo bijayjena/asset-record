@@ -1,7 +1,7 @@
 import { Gadget, getCategoryLabel, getConditionLabel } from '@/types/gadget';
 import { formatPrice, Currency } from '@/lib/currency';
 
-export const exportGadgetsToCSV = (gadgets: Gadget[], currency: Currency = 'USD') => {
+export const exportGadgetsToCSV = (gadgets: Gadget[], currency: Currency = 'INR') => {
   const headers = [
     'Name',
     'Brand',

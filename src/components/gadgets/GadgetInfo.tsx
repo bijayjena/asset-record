@@ -20,7 +20,7 @@ interface GadgetInfoProps {
 
 export const GadgetInfo = ({ gadget }: GadgetInfoProps) => {
   const { profile } = useProfile();
-  const currency = profile?.currency || 'USD';
+  const currency = profile?.currency || 'INR';
   const warrantyStatus = getWarrantyStatus(gadget.warranty_expiry);
   
   const getWarrantyBadge = () => {

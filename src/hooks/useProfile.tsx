@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import type { Currency } from '@/lib/currency';
+import { useQuery } from '@tanstack/react-query';
 
 export interface Profile {
   id: string;
@@ -19,63 +19,36 @@ export interface Profile {
 
 export const useProfile = () => {
   const { user } = useAuth();
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (!user) {
-      setProfile(null);
-      setLoading(false);
-      return;
-    }
+  const { data: profile, isLoading: loading, refetch } = useQuery({
+    queryKey: ['profile', user?.id],
+    queryFn: async () => {
+      if (!user) return null;
 
-    const fetchProfile = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('user_id', user.id)
-          .single();
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
 
-        if (error) {
-          // Profile doesn't exist, create one
-          if (error.code === 'PGRST116') {
-            const { data: newProfile, error: createError } = await supabase
-              .from('profiles')
-              .insert({ user_id: user.id })
-              .select()
-              .single();
+      if (error) {
+        // Profile doesn't exist, create one
+        if (error.code === 'PGRST116') {
+          const { data: newProfile, error: createError } = await supabase
+            .from('profiles')
+            .insert({ user_id: user.id })
+            .select()
+            .single();
 
-            if (!createError && newProfile) {
-              setProfile(newProfile as Profile);
-            }
-          }
-        } else {
-          setProfile(data as Profile);
+          if (createError) throw createError;
+          return newProfile as Profile;
         }
-      } catch (err) {
-        console.error('Error fetching profile:', err);
-      } finally {
-        setLoading(false);
+        throw error;
       }
-    };
+      return data as Profile;
+    },
+    enabled: !!user,
+  });
 
-    fetchProfile();
-  }, [user]);
-
-  const refreshProfile = async () => {
-    if (!user) return;
-    
-    const { data } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('user_id', user.id)
-      .single();
-    
-    if (data) {
-      setProfile(data as Profile);
-    }
-  };
-
-  return { profile, loading, refreshProfile };
+  return { profile: profile || null, loading, refreshProfile: refetch };
 };

@@ -28,7 +28,7 @@ const Settings = () => {
   const [age, setAge] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [wantsTutorial, setWantsTutorial] = useState(false);
-  const [currency, setCurrency] = useState<Currency>('USD');
+  const [currency, setCurrency] = useState<Currency>('INR');
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -37,7 +37,7 @@ const Settings = () => {
       setAge(profile.age?.toString() || '');
       setDisplayName(profile.display_name || '');
       setWantsTutorial(profile.wants_tutorial || false);
-      setCurrency(profile.currency || 'USD');
+      setCurrency(profile.currency || 'INR');
     }
   }, [profile]);
 

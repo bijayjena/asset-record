@@ -91,9 +91,17 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="gap-2 px-3">
+                  <Button variant="ghost" className="gap-2 px-3 hover:bg-secondary/50">
                     <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
                       <User className="w-4 h-4 text-primary" />
+                    </div>
+                    <div className="hidden sm:flex flex-col items-start">
+                      <span className="text-sm font-medium text-foreground">
+                        {profile?.full_name || 'User'}
+                      </span>
+                      <span className="text-xs text-muted-foreground">
+                        {user?.email?.split('@')[0] || 'Account'}
+                      </span>
                     </div>
                     <ChevronDown className="w-4 h-4 text-muted-foreground" />
                   </Button>

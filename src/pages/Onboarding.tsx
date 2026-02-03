@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,6 +16,7 @@ type Step = 'welcome' | 'profile' | 'tutorial' | 'demo-data' | 'complete';
 const Onboarding = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [step, setStep] = useState<Step>('welcome');
   const [fullName, setFullName] = useState('');
   const [age, setAge] = useState('');
@@ -66,6 +68,9 @@ const Onboarding = () => {
       if (wantsDemoData) {
         await seedDemoGadgets(user.id);
       }
+
+      // Invalidate profile cache so ProtectedRoute sees the update
+      await queryClient.invalidateQueries({ queryKey: ['profile'] });
 
       toast.success('Welcome to AssetRecord!');
       navigate('/dashboard');

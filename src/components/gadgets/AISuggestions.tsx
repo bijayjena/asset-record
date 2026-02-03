@@ -52,7 +52,7 @@ export const AISuggestions = ({
     
     try {
       // Get user's preferred currency
-      const currency = profile?.currency || 'USD';
+      const currency = profile?.currency || 'INR';
       const currencySymbol = getCurrencySymbol(currency);
       
       // Build personalized context from user profile

@@ -5,22 +5,29 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Eye, EyeOff, Mail, Lock, Cpu, ArrowRight, Github } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, Cpu, ArrowRight, Github, User } from 'lucide-react';
 import { z } from 'zod';
+import { CURRENCIES, type Currency } from '@/lib/currency';
+import { supabase } from '@/integrations/supabase/client';
 
 const authSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
+  fullName: z.string().min(2, 'Full name must be at least 2 characters').optional(),
+  currency: z.string().optional(),
 });
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [currency, setCurrency] = useState<Currency>('INR');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [errors, setErrors] = useState<{ email?: string; password?: string; fullName?: string }>({});
 
   const { user, signIn, signUp, signInWithGoogle, signInWithGithub } = useAuth();
   const navigate = useNavigate();
@@ -32,16 +39,28 @@ const Auth = () => {
   }, [user, navigate]);
 
   const validateForm = () => {
-    const result = authSchema.safeParse({ email, password });
+    const formData = isLogin 
+      ? { email, password }
+      : { email, password, fullName, currency };
+    
+    const result = authSchema.safeParse(formData);
     if (!result.success) {
-      const fieldErrors: { email?: string; password?: string } = {};
+      const fieldErrors: { email?: string; password?: string; fullName?: string } = {};
       result.error.errors.forEach((err) => {
         if (err.path[0] === 'email') fieldErrors.email = err.message;
         if (err.path[0] === 'password') fieldErrors.password = err.message;
+        if (err.path[0] === 'fullName') fieldErrors.fullName = err.message;
       });
       setErrors(fieldErrors);
       return false;
     }
+    
+    // Additional validation for sign up
+    if (!isLogin && !fullName.trim()) {
+      setErrors({ fullName: 'Full name is required' });
+      return false;
+    }
+    
     setErrors({});
     return true;
   };
@@ -75,6 +94,23 @@ const Auth = () => {
             toast.error(error.message);
           }
         } else {
+          // Create profile with additional details
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            const { error: profileError } = await supabase
+              .from('profiles')
+              .upsert({
+                user_id: user.id,
+                full_name: fullName.trim(),
+                currency: currency,
+                onboarding_completed: false,
+              });
+            
+            if (profileError) {
+              console.error('Profile creation error:', profileError);
+            }
+          }
+          
           toast.success('Account created! Welcome to AssetRecord.');
           navigate('/dashboard');
         }
@@ -161,6 +197,26 @@ const Auth = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
+              {!isLogin && (
+                <div className="space-y-2">
+                  <Label htmlFor="fullName">Full Name</Label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <Input
+                      id="fullName"
+                      type="text"
+                      placeholder="John Doe"
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      className="pl-10 h-12 bg-secondary/50 border-border/50"
+                    />
+                  </div>
+                  {errors.fullName && (
+                    <p className="text-sm text-destructive">{errors.fullName}</p>
+                  )}
+                </div>
+              )}
+
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <div className="relative">
@@ -203,6 +259,27 @@ const Auth = () => {
                   <p className="text-sm text-destructive">{errors.password}</p>
                 )}
               </div>
+
+              {!isLogin && (
+                <div className="space-y-2">
+                  <Label htmlFor="currency">Preferred Currency</Label>
+                  <Select value={currency} onValueChange={(value: Currency) => setCurrency(value)}>
+                    <SelectTrigger className="h-12 bg-secondary/50 border-border/50">
+                      <SelectValue placeholder="Select currency" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CURRENCIES.map((curr) => (
+                        <SelectItem key={curr.value} value={curr.value}>
+                          <div className="flex items-center gap-2">
+                            <span className="font-medium">{curr.symbol}</span>
+                            <span>{curr.label}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
               <Button
                 type="submit"
@@ -279,6 +356,8 @@ const Auth = () => {
                 onClick={() => {
                   setIsLogin(!isLogin);
                   setErrors({});
+                  setFullName('');
+                  setCurrency('INR');
                 }}
                 className="text-sm text-muted-foreground hover:text-primary transition-colors"
               >

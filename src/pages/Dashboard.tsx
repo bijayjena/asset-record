@@ -94,7 +94,7 @@ const Dashboard = () => {
       toast.error('No assets to export');
       return;
     }
-    const currency = (profile?.currency as Currency) || 'USD';
+    const currency = (profile?.currency as Currency) || 'INR';
     const csvContent = exportGadgetsToCSV(gadgets, currency);
     const date = new Date().toISOString().split('T')[0];
     downloadCSV(csvContent, `asset-record-export-${date}.csv`);
