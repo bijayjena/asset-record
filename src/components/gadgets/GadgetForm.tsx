@@ -20,13 +20,16 @@ import {
   Gadget,
   GadgetCategory,
   GadgetCondition,
+  OwnershipType,
+  VehicleType,
   getCategoryLabel,
   getConditionLabel,
   getCategoryIcon,
 } from '@/types/gadget';
 import { format, parseISO } from 'date-fns';
-import { CalendarIcon, Save, Loader2 } from 'lucide-react';
+import { CalendarIcon, Save, Loader2, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const CATEGORIES: GadgetCategory[] = [
   'phone', 'laptop', 'tablet', 'watch', 'headphones',
@@ -36,6 +39,8 @@ const CATEGORIES: GadgetCategory[] = [
 ];
 
 const CONDITIONS: GadgetCondition[] = ['excellent', 'good', 'okay', 'bad'];
+const OWNERSHIP_TYPES: OwnershipType[] = ['first_hand', 'second_hand', 'third_hand'];
+const VEHICLE_TYPES: VehicleType[] = ['car', 'bike', 'scooty', 'other'];
 
 export interface GadgetFormData {
   name: string;
@@ -48,6 +53,9 @@ export interface GadgetFormData {
   orderId: string;
   warrantyExpiry: Date | undefined;
   condition: GadgetCondition;
+  ownershipType?: OwnershipType;
+  vehicleType?: VehicleType;
+  manufacturingDate?: Date | undefined;
   serialNumber: string;
   notes: string;
 }
@@ -82,6 +90,17 @@ export const GadgetForm = ({
   const [serialNumber, setSerialNumber] = useState(initialData?.serial_number || '');
   const [notes, setNotes] = useState(initialData?.notes || '');
 
+  // New Fields
+  const [ownershipType, setOwnershipType] = useState<OwnershipType>(
+    initialData?.ownership_type || 'first_hand'
+  );
+  const [vehicleType, setVehicleType] = useState<VehicleType>(
+    initialData?.vehicle_type || 'car'
+  );
+  const [manufacturingDate, setManufacturingDate] = useState<Date | undefined>(
+    initialData?.manufacturing_date ? parseISO(initialData.manufacturing_date) : undefined
+  );
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await onSubmit({
@@ -95,9 +114,31 @@ export const GadgetForm = ({
       orderId,
       warrantyExpiry,
       condition,
+      ownershipType,
+      vehicleType: category === 'vehicle' ? vehicleType : undefined,
+      manufacturingDate,
       serialNumber,
       notes,
     });
+  };
+
+  const getOwnershipLabel = (type: OwnershipType) => {
+    switch (type) {
+      case 'first_hand': return 'First Hand (New)';
+      case 'second_hand': return 'Second Hand';
+      case 'third_hand': return 'Third Hand+';
+      default: return type;
+    }
+  };
+
+  const getVehicleLabel = (type: VehicleType) => {
+    switch (type) {
+      case 'car': return 'Car';
+      case 'bike': return 'Bike / Motorcycle';
+      case 'scooty': return 'Scooter / Scooty';
+      case 'other': return 'Other Vehicle';
+      default: return type;
+    }
   };
 
   return (
@@ -124,21 +165,42 @@ export const GadgetForm = ({
         </div>
 
         <div className="space-y-2">
-          <Label>Condition *</Label>
-          <Select value={condition} onValueChange={(v) => setCondition(v as GadgetCondition)}>
+          <Label>Ownership Type *</Label>
+          <Select value={ownershipType} onValueChange={(v) => setOwnershipType(v as OwnershipType)}>
             <SelectTrigger className="bg-secondary/50">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {CONDITIONS.map((cond) => (
-                <SelectItem key={cond} value={cond}>
-                  {getConditionLabel(cond)}
+              {OWNERSHIP_TYPES.map((type) => (
+                <SelectItem key={type} value={type}>
+                  {getOwnershipLabel(type)}
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
       </div>
+
+      {/* Vehicle Specific Field */}
+      {category === 'vehicle' && (
+        <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-4">
+          <div className="space-y-2">
+            <Label>Vehicle Type *</Label>
+            <Select value={vehicleType} onValueChange={(v) => setVehicleType(v as VehicleType)}>
+              <SelectTrigger className="bg-secondary/50">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {VEHICLE_TYPES.map((type) => (
+                  <SelectItem key={type} value={type}>
+                    {getVehicleLabel(type)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      )}
 
       {/* Name */}
       <div className="space-y-2">
@@ -176,10 +238,12 @@ export const GadgetForm = ({
         </div>
       </div>
 
-      {/* Purchase Date & Warranty */}
-      <div className="grid grid-cols-2 gap-4">
+      {/* Dates Row */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label>Purchase Date *</Label>
+          <Label>
+            {ownershipType === 'first_hand' ? 'Purchase Date *' : 'Your Purchase Date *'}
+          </Label>
           <Popover>
             <PopoverTrigger asChild>
               <Button
@@ -207,6 +271,42 @@ export const GadgetForm = ({
             </PopoverContent>
           </Popover>
         </div>
+
+        {/* Manufacturing Date - Required for Second Hand OR Vehicles */}
+        {(ownershipType !== 'first_hand' || category === 'vehicle') && (
+          <div className="space-y-2 animate-in fade-in slide-in-from-top-4">
+            <Label>
+              Manufacturing Date
+              {(ownershipType !== 'first_hand' || category === 'vehicle') && ' *'}
+            </Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    'w-full justify-start text-left font-normal bg-secondary/50',
+                    !manufacturingDate && 'text-muted-foreground'
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {manufacturingDate ? format(manufacturingDate, 'PPP') : 'Pick a date'}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={manufacturingDate}
+                  onSelect={setManufacturingDate}
+                  initialFocus
+                  disabled={(date) => date > new Date()}
+                  captionLayout="dropdown-buttons"
+                  fromYear={1900}
+                  toYear={new Date().getFullYear()}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+        )}
 
         <div className="space-y-2">
           <Label>Warranty Expiry</Label>
@@ -236,7 +336,33 @@ export const GadgetForm = ({
             </PopoverContent>
           </Popover>
         </div>
+
+        <div className="space-y-2">
+          <Label>Condition *</Label>
+          <Select value={condition} onValueChange={(v) => setCondition(v as GadgetCondition)}>
+            <SelectTrigger className="bg-secondary/50">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {CONDITIONS.map((cond) => (
+                <SelectItem key={cond} value={cond}>
+                  {getConditionLabel(cond)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
+
+      {/* Helper Text for Second Hand Items */}
+      {ownershipType !== 'first_hand' && (
+        <Alert className="bg-primary/10 border-primary/20">
+          <Info className="h-4 w-4 text-primary" />
+          <AlertDescription className="text-xs text-primary/80">
+            For pre-owned items, the warranty is often determined by the manufacturing date or original purchase date, not your purchase date.
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Price & Vendor */}
       <div className="grid grid-cols-2 gap-4">
@@ -253,10 +379,10 @@ export const GadgetForm = ({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="vendor">Vendor/Store</Label>
+          <Label htmlFor="vendor">{ownershipType === 'first_hand' ? 'Vendor/Store' : 'Seller/Source'}</Label>
           <Input
             id="vendor"
-            placeholder="e.g., Apple Store, Dealership"
+            placeholder={ownershipType === 'first_hand' ? "e.g., Apple Store, Dealership" : "e.g., eBay, Friend"}
             value={vendorName}
             onChange={(e) => setVendorName(e.target.value)}
             className="bg-secondary/50"

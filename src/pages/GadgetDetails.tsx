@@ -119,6 +119,9 @@ const GadgetDetails = () => {
         order_id: formData.orderId.trim() || null,
         warranty_expiry: formData.warrantyExpiry ? format(formData.warrantyExpiry, 'yyyy-MM-dd') : null,
         condition: formData.condition,
+        ownership_type: formData.ownershipType,
+        vehicle_type: formData.vehicleType,
+        manufacturing_date: formData.manufacturingDate ? format(formData.manufacturingDate, 'yyyy-MM-dd') : null,
         serial_number: formData.serialNumber.trim() || null,
         notes: formData.notes.trim() || null,
       });

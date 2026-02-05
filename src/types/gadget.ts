@@ -20,6 +20,8 @@ export type GadgetCategory =
 export type GadgetCondition = 'excellent' | 'good' | 'okay' | 'bad';
 
 export type AttachmentType = 'bill' | 'warranty' | 'photo' | 'other';
+export type OwnershipType = 'first_hand' | 'second_hand' | 'third_hand';
+export type VehicleType = 'car' | 'bike' | 'scooty' | 'other';
 
 export interface Gadget {
   id: string;
@@ -34,6 +36,9 @@ export interface Gadget {
   order_id: string | null;
   warranty_expiry: string | null;
   condition: GadgetCondition;
+  ownership_type?: OwnershipType;
+  vehicle_type?: VehicleType;
+  manufacturing_date?: string;
   serial_number: string | null;
   notes: string | null;
   image_url: string | null;

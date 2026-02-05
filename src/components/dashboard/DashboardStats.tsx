@@ -115,8 +115,9 @@ const DashboardStats = ({ gadgets }: DashboardStatsProps) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0 }}
+          className="h-full"
         >
-          <Card className="stat-card">
+          <Card className="stat-card h-full">
             <div className="flex items-center gap-3 mb-3">
               <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
                 <Cpu className="w-5 h-5 text-primary" />
@@ -131,8 +132,9 @@ const DashboardStats = ({ gadgets }: DashboardStatsProps) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.05 }}
+          className="h-full"
         >
-          <Card className="stat-card">
+          <Card className="stat-card h-full">
             <div className="flex items-center gap-3 mb-3">
               <div className="w-10 h-10 rounded-xl bg-gv-info/20 flex items-center justify-center">
                 <Clock className="w-5 h-5 text-gv-info" />
@@ -149,22 +151,25 @@ const DashboardStats = ({ gadgets }: DashboardStatsProps) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
+          className="h-full"
         >
-          <Card className="stat-card">
+          <Card className="stat-card h-full flex flex-col justify-between">
             <div className="flex items-center gap-3 mb-3">
               <div className="w-10 h-10 rounded-xl bg-gv-warning/20 flex items-center justify-center">
                 <TrendingUp className="w-5 h-5 text-gv-warning" />
               </div>
               <span className="text-sm text-muted-foreground">Oldest Asset</span>
             </div>
-            <div className="text-lg font-bold truncate">
-              {stats.oldestGadget?.name || '-'}
-            </div>
-            {stats.oldestGadget && (
-              <div className="text-sm text-muted-foreground">
-                {formatAgeDisplay(calculateAge(stats.oldestGadget.purchase_date).totalMonths)}
+            <div>
+              <div className="text-lg font-bold truncate">
+                {stats.oldestGadget?.name || '-'}
               </div>
-            )}
+              {stats.oldestGadget && (
+                <div className="text-sm text-muted-foreground">
+                  {formatAgeDisplay(calculateAge(stats.oldestGadget.purchase_date).totalMonths)}
+                </div>
+              )}
+            </div>
           </Card>
         </motion.div>
 
@@ -172,8 +177,9 @@ const DashboardStats = ({ gadgets }: DashboardStatsProps) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
+          className="h-full"
         >
-          <Card className={`stat-card ${stats.expiringWarranties.length > 0 ? 'border-gv-warning/50' : ''}`}>
+          <Card className={`stat-card h-full flex flex-col justify-between ${stats.expiringWarranties.length > 0 ? 'border-gv-warning/50' : ''}`}>
             <div className="flex items-center gap-3 mb-3">
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${stats.expiringWarranties.length > 0 ? 'bg-gv-warning/20' : 'bg-gv-success/20'
                 }`}>
@@ -182,14 +188,16 @@ const DashboardStats = ({ gadgets }: DashboardStatsProps) => {
               </div>
               <span className="text-sm text-muted-foreground">Warranties Expiring</span>
             </div>
-            <div className="text-3xl font-bold">
-              {stats.expiringWarranties.length}
-            </div>
-            {stats.expiringWarranties.length > 0 && (
-              <div className="text-sm text-gv-warning mt-1">
-                {stats.expiringWarranties.map(g => g.name).slice(0, 2).join(', ')}
+            <div>
+              <div className="text-3xl font-bold">
+                {stats.expiringWarranties.length}
               </div>
-            )}
+              {stats.expiringWarranties.length > 0 && (
+                <div className="text-sm text-gv-warning mt-1 truncate">
+                  {stats.expiringWarranties.map(g => g.name).slice(0, 2).join(', ')}
+                </div>
+              )}
+            </div>
           </Card>
         </motion.div>
       </div>
