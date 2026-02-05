@@ -1,28 +1,46 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Gadget, AISuggestion, AIResponse, AIAlternative } from '@/types/gadget';
-import { fetchAISuggestion, saveAISuggestion } from '@/lib/supabase-helpers';
+import { saveAISuggestion } from '@/lib/supabase-helpers';
 import { useProfile } from '@/hooks/useProfile';
 import { getCurrencySymbol } from '@/lib/currency';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from 'sonner';
-import { format, parseISO, differenceInMinutes } from 'date-fns';
-import { 
-  Sparkles, 
-  RefreshCw, 
-  Loader2, 
+import { parseISO, differenceInMinutes } from 'date-fns';
+import {
+  Sparkles,
+  RefreshCw,
+  Loader2,
   TrendingUp,
   Clock,
   ThumbsUp,
-  ThumbsDown,
   Minus,
   DollarSign,
   Target,
   Zap,
-  User,
+  Settings,
+  ExternalLink,
 } from 'lucide-react';
 
 interface AISuggestionsProps {
@@ -31,10 +49,10 @@ interface AISuggestionsProps {
   onSuggestionUpdate: () => void;
 }
 
-export const AISuggestions = ({ 
-  gadget, 
-  cachedSuggestion, 
-  onSuggestionUpdate 
+export const AISuggestions = ({
+  gadget,
+  cachedSuggestion,
+  onSuggestionUpdate
 }: AISuggestionsProps) => {
   const { profile } = useProfile();
   const [loading, setLoading] = useState(false);
@@ -45,85 +63,140 @@ export const AISuggestions = ({
     cachedSuggestion?.created_at || null
   );
 
-  const purchaseYear = new Date(gadget.purchase_date).getFullYear();
+  // Configuration State
+  const [showConfigModal, setShowConfigModal] = useState(false);
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+  const [gender, setGender] = useState<string>('');
+  const [tempAge, setTempAge] = useState<string>('');
+
+  // New Filter States
+  const [budgetMin, setBudgetMin] = useState<string>('');
+  const [budgetMax, setBudgetMax] = useState<string>('');
+  const [issues, setIssues] = useState<string>('');
+
+  useEffect(() => {
+    // Pre-fill age if available
+    if (profile?.age) setTempAge(profile.age.toString());
+  }, [profile]);
+
+  const handleStartAnalysis = () => {
+    // Check for API Key in env
+    if (!apiKey) {
+      toast.error('Gemini API Key is missing. Please add VITE_GEMINI_API_KEY to your .env file.');
+      return;
+    }
+
+    // Always show config modal to confirm budget/issues
+    setShowConfigModal(true);
+  };
+
+  const handleConfigSubmit = () => {
+    if (!gender) {
+      toast.error('Please select your gender');
+      return;
+    }
+    if (!tempAge || parseInt(tempAge) < 13) {
+      toast.error('Please enter a valid age');
+      return;
+    }
+    if (!budgetMax) {
+      toast.error('Please enter a maximum budget');
+      return;
+    }
+
+    setShowConfigModal(false);
+    fetchSuggestions();
+  };
 
   const fetchSuggestions = async () => {
+    if (!apiKey) {
+      toast.error('Gemini API Key is missing.');
+      return;
+    }
+
     setLoading(true);
-    
+
     try {
-      // Get user's preferred currency
       const currency = profile?.currency || 'INR';
       const currencySymbol = getCurrencySymbol(currency);
-      
-      // Build personalized context from user profile
-      const userContext = profile?.full_name && profile?.age 
-        ? `The user is ${profile.full_name}, aged ${profile.age}. Consider their age group when making recommendations (e.g., younger users may prefer gaming/social features, older users may prefer simplicity/accessibility).`
-        : '';
+      const purchaseYear = new Date(gadget.purchase_date).getFullYear();
+
+      const userContext = `The user is ${profile?.full_name || 'a tech enthusiast'}, aged ${tempAge}, gender: ${gender}.`;
+
+      let constraintText = `Budget Range: ${budgetMin ? currencySymbol + budgetMin + ' - ' : ''}${currencySymbol}${budgetMax}.`;
+      if (issues) {
+        constraintText += `\nCurrent Issues Faced: ${issues}. Prioritize alternatives that solve these issues.`;
+      }
 
       const prompt = `${userContext}
 
-Given this gadget: ${gadget.brand} ${gadget.model || gadget.name} (${gadget.category}), purchased in ${purchaseYear}, suggest best upgrade alternatives available now. Consider current market offerings and value for money. Use ${currency} (${currencySymbol}) for all prices. Return JSON only with this exact structure:
+Given this gadget: ${gadget.brand} ${gadget.model || gadget.name} (${gadget.category}), purchased in ${purchaseYear}, suggest best upgrade alternatives available now. 
+${constraintText}
+
+Consider the user's age and gender for tailored recommendations (e.g., style preferences, ease of use, technical depth).
+Consider current market offerings and value for money within the budget. 
+Use ${currency} (${currencySymbol}) for all prices.
+
+Return JSON only with this exact structure:
 {
   "verdict": "Upgrade Now" or "Wait" or "Keep",
-  "summary": "Brief explanation of the verdict${profile?.full_name ? `, addressing ${profile.full_name.split(' ')[0]} personally` : ''}",
+  "summary": "Brief explanation of the verdict, addressing the user personally.",
   "alternatives": [
     {
       "name": "Product Name",
       "priceRange": "${currencySymbol}XXX - ${currencySymbol}XXX",
       "whyBetter": ["reason1", "reason2"],
       "bestFor": ["use case 1", "use case 2"],
-      "upgradeScore": 0-100
+      "upgradeScore": 0-100,
+      "url": "https://www.google.com/search?q=Product+Name+buy" 
     }
   ]
 }
-Provide 3-5 realistic alternatives with prices in ${currency}.`;
+For the "url" field, generate a valid Google Search URL for buying the product (e.g., https://www.google.com/search?q=iPhone+15+buy).
+Provide 3-5 realistic alternatives.`;
 
-      const res = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-        },
-        body: JSON.stringify({
-          model: 'google/gemini-2.5-flash',
-          messages: [
-            {
-              role: 'system',
-              content: 'You are a tech expert helping users decide on gadget upgrades. Always respond with valid JSON only, no markdown formatting.',
-            },
-            { role: 'user', content: prompt },
-          ],
-          temperature: 0.7,
-        }),
-      });
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: {
+              responseMimeType: "application/json"
+            }
+          })
+        }
+      );
 
-      if (!res.ok) {
-        throw new Error('Failed to get AI response');
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Gemini API Error:', errorData);
+        throw new Error(errorData.error?.message || 'Failed to get AI response');
       }
 
-      const data = await res.json();
-      let content = data.choices[0]?.message?.content || '';
-      
-      // Clean up response - remove markdown code blocks if present
-      content = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-      
-      const aiResponse: AIResponse = JSON.parse(content);
-      
+      const data = await response.json();
+      const textContent = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+      if (!textContent) throw new Error('No content received from AI');
+
+      const aiResponse: AIResponse = JSON.parse(textContent);
+
       // Validate response structure
-      if (!aiResponse.verdict || !aiResponse.summary || !Array.isArray(aiResponse.alternatives)) {
+      if (!aiResponse.verdict || !Array.isArray(aiResponse.alternatives)) {
         throw new Error('Invalid AI response structure');
       }
 
       // Save to database
       await saveAISuggestion(gadget.id, aiResponse);
-      
+
       setResponse(aiResponse);
       setLastUpdated(new Date().toISOString());
       onSuggestionUpdate();
       toast.success('AI suggestions updated!');
     } catch (error) {
       console.error('Error fetching AI suggestions:', error);
-      toast.error('Failed to get AI suggestions. Please try again.');
+      toast.error(error instanceof Error ? error.message : 'Failed to get AI suggestions');
     } finally {
       setLoading(false);
     }
@@ -131,30 +204,10 @@ Provide 3-5 realistic alternatives with prices in ${currency}.`;
 
   const getVerdictConfig = (verdict: string) => {
     switch (verdict) {
-      case 'Upgrade Now':
-        return { 
-          icon: TrendingUp, 
-          color: 'text-green-400',
-          bg: 'bg-green-500/20 border-green-500/30',
-        };
-      case 'Wait':
-        return { 
-          icon: Clock, 
-          color: 'text-yellow-400',
-          bg: 'bg-yellow-500/20 border-yellow-500/30',
-        };
-      case 'Keep':
-        return { 
-          icon: ThumbsUp, 
-          color: 'text-blue-400',
-          bg: 'bg-blue-500/20 border-blue-500/30',
-        };
-      default:
-        return { 
-          icon: Minus, 
-          color: 'text-muted-foreground',
-          bg: 'bg-secondary',
-        };
+      case 'Upgrade Now': return { icon: TrendingUp, color: 'text-green-500', bg: 'bg-green-500/10 border-green-500/20' };
+      case 'Wait': return { icon: Clock, color: 'text-yellow-500', bg: 'bg-yellow-500/10 border-yellow-500/20' };
+      case 'Keep': return { icon: ThumbsUp, color: 'text-blue-500', bg: 'bg-blue-500/10 border-blue-500/20' };
+      default: return { icon: Minus, color: 'text-muted-foreground', bg: 'bg-secondary' };
     }
   };
 
@@ -170,7 +223,6 @@ Provide 3-5 realistic alternatives with prices in ${currency}.`;
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/50 flex items-center justify-center">
@@ -184,32 +236,43 @@ Provide 3-5 realistic alternatives with prices in ${currency}.`;
           </div>
         </div>
 
-        <Button
-          onClick={fetchSuggestions}
-          disabled={loading}
-          variant={response ? 'outline' : 'default'}
-          className={!response ? 'btn-gradient text-primary-foreground' : ''}
-        >
-          {loading ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Analyzing...
-            </>
-          ) : response ? (
-            <>
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Refresh
-            </>
-          ) : (
-            <>
-              <Sparkles className="w-4 h-4 mr-2" />
-              Find Alternatives
-            </>
+        <div className="flex gap-2">
+          {response && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setShowConfigModal(true)}
+              title="Update Preferences"
+            >
+              <Settings className="w-4 h-4" />
+            </Button>
           )}
-        </Button>
+          <Button
+            onClick={handleStartAnalysis}
+            disabled={loading}
+            variant={response ? 'outline' : 'default'}
+            className={!response ? 'btn-gradient text-primary-foreground' : ''}
+          >
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Analyzing...
+              </>
+            ) : response ? (
+              <>
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Refresh
+              </>
+            ) : (
+              <>
+                <Sparkles className="w-4 h-4 mr-2" />
+                Find Alternatives
+              </>
+            )}
+          </Button>
+        </div>
       </div>
 
-      {/* Results */}
       <AnimatePresence mode="wait">
         {response && (
           <motion.div
@@ -218,10 +281,9 @@ Provide 3-5 realistic alternatives with prices in ${currency}.`;
             exit={{ opacity: 0, y: -20 }}
             className="space-y-6"
           >
-            {/* Verdict Card */}
             <Card className={`p-6 border-2 ${getVerdictConfig(response.verdict).bg}`}>
               <div className="flex items-start gap-4">
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${getVerdictConfig(response.verdict).bg}`}>
+                <div className={`w-12 h-12 rounded-xl flex items-center justify-center bg-background/50`}>
                   {(() => {
                     const Icon = getVerdictConfig(response.verdict).icon;
                     return <Icon className={`w-6 h-6 ${getVerdictConfig(response.verdict).color}`} />;
@@ -231,15 +293,17 @@ Provide 3-5 realistic alternatives with prices in ${currency}.`;
                   <h4 className={`text-xl font-bold ${getVerdictConfig(response.verdict).color}`}>
                     {response.verdict}
                   </h4>
-                  <p className="text-muted-foreground mt-1">{response.summary}</p>
+                  <p className="text-muted-foreground mt-1 text-sm leading-relaxed">{response.summary}</p>
                 </div>
               </div>
             </Card>
 
-            {/* Alternatives */}
             <div className="space-y-4">
-              <h4 className="font-semibold text-lg">Recommended Alternatives</h4>
-              
+              <h4 className="font-semibold text-lg flex items-center gap-2">
+                <Target className="w-5 h-5 text-primary" />
+                Recommended Alternatives
+              </h4>
+
               <div className="grid gap-4">
                 {response.alternatives.map((alt, index) => (
                   <AlternativeCard key={index} alternative={alt} rank={index + 1} />
@@ -250,16 +314,97 @@ Provide 3-5 realistic alternatives with prices in ${currency}.`;
         )}
       </AnimatePresence>
 
-      {/* Empty State */}
       {!response && !loading && (
         <Card className="p-8 text-center bg-secondary/30 border-dashed">
           <Sparkles className="w-12 h-12 mx-auto mb-4 text-primary/50" />
           <h4 className="font-semibold mb-2">No recommendations yet</h4>
           <p className="text-sm text-muted-foreground mb-4">
-            Click "Find Alternatives" to get AI-powered upgrade suggestions for your {gadget.name}
+            Click "Find Alternatives" to get AI-powered upgrade suggestions based on your profile and device.
           </p>
         </Card>
       )}
+
+      <Dialog open={showConfigModal} onOpenChange={setShowConfigModal}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Customize Recommendations</DialogTitle>
+            <DialogDescription>
+              Help the AI find the best upgrade for you.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="gender">Gender</Label>
+                <Select value={gender} onValueChange={setGender}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Male">Male</SelectItem>
+                    <SelectItem value="Female">Female</SelectItem>
+                    <SelectItem value="Non-binary">Non-binary</SelectItem>
+                    <SelectItem value="Prefer not to say">Prefer not to say</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="age">Age</Label>
+                <Input
+                  id="age"
+                  type="number"
+                  min={13}
+                  max={120}
+                  value={tempAge}
+                  onChange={(e) => setTempAge(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Budget Range ({getCurrencySymbol(profile?.currency || 'INR')})</Label>
+              <div className="flex gap-4">
+                <div className="space-y-1 flex-1">
+                  <Input
+                    type="number"
+                    placeholder="Min (Optional)"
+                    value={budgetMin}
+                    onChange={(e) => setBudgetMin(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-1 flex-1">
+                  <Input
+                    type="number"
+                    placeholder="Max (Required)"
+                    value={budgetMax}
+                    onChange={(e) => setBudgetMax(e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="issues">Current Issues (Optional)</Label>
+              <Textarea
+                id="issues"
+                placeholder="e.g. Battery drains too fast, camera is blurry..."
+                value={issues}
+                onChange={(e) => setIssues(e.target.value)}
+                className="h-20 resize-none"
+              />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowConfigModal(false)}>Cancel</Button>
+            <Button onClick={handleConfigSubmit} className="btn-gradient text-primary-foreground">
+              Analyze
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
@@ -271,9 +416,9 @@ interface AlternativeCardProps {
 
 const AlternativeCard = ({ alternative, rank }: AlternativeCardProps) => {
   const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-400';
-    if (score >= 60) return 'text-yellow-400';
-    return 'text-orange-400';
+    if (score >= 80) return 'text-green-500';
+    if (score >= 60) return 'text-yellow-500';
+    return 'text-orange-500';
   };
 
   return (
@@ -284,58 +429,72 @@ const AlternativeCard = ({ alternative, rank }: AlternativeCardProps) => {
     >
       <Card className="p-4 bg-secondary/30 border-border/50 hover:bg-secondary/50 transition-colors">
         <div className="flex items-start gap-4">
-          {/* Rank */}
           <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center flex-shrink-0">
             <span className="text-sm font-bold text-primary">#{rank}</span>
           </div>
 
-          {/* Content */}
           <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 sm:gap-4">
               <div>
-                <h5 className="font-semibold">{alternative.name}</h5>
+                <h5 className="font-semibold text-lg hover:underline cursor-pointer" onClick={() => alternative.url && window.open(alternative.url, '_blank')}>
+                  {alternative.name}
+                  {alternative.url && <ExternalLink className="w-3 h-3 inline-block ml-1 opacity-50" />}
+                </h5>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                   <DollarSign className="w-3.5 h-3.5" />
-                  <span>{alternative.priceRange}</span>
+                  <span className="font-medium text-foreground">{alternative.priceRange}</span>
                 </div>
               </div>
 
-              {/* Score */}
-              <div className="text-right">
-                <div className={`text-2xl font-bold ${getScoreColor(alternative.upgradeScore)}`}>
-                  {alternative.upgradeScore}
+              <div className="flex items-center gap-3 sm:block sm:text-right">
+                <div className="flex items-center gap-2 sm:block">
+                  <div className={`text-xl font-bold ${getScoreColor(alternative.upgradeScore)}`}>
+                    {alternative.upgradeScore}
+                  </div>
+                  <p className="text-xs text-muted-foreground hidden sm:block">Match Score</p>
                 </div>
-                <p className="text-xs text-muted-foreground">Score</p>
+                <div className="sm:hidden text-xs text-muted-foreground">Match Score</div>
               </div>
             </div>
 
-            {/* Progress bar */}
-            <Progress 
-              value={alternative.upgradeScore} 
-              className="h-1.5 mt-3"
+            <Progress
+              value={alternative.upgradeScore}
+              className="h-1.5 mt-3 mb-4"
             />
 
-            {/* Why Better */}
-            <div className="mt-4 space-y-2">
-              <div className="flex items-center gap-2 text-sm">
-                <Zap className="w-4 h-4 text-primary" />
-                <span className="font-medium">Why Better:</span>
+            <div className="space-y-3">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 text-sm font-medium text-primary">
+                  <Zap className="w-3.5 h-3.5" />
+                  Why Better?
+                </div>
+                <ul className="text-sm text-muted-foreground space-y-1 ml-1.5 border-l-2 border-primary/20 pl-3">
+                  {alternative.whyBetter.map((reason, i) => (
+                    <li key={i}>{reason}</li>
+                  ))}
+                </ul>
               </div>
-              <ul className="text-sm text-muted-foreground space-y-1 ml-6">
-                {alternative.whyBetter.map((reason, i) => (
-                  <li key={i} className="list-disc">{reason}</li>
-                ))}
-              </ul>
-            </div>
 
-            {/* Best For */}
-            <div className="flex flex-wrap gap-2 mt-3">
-              {alternative.bestFor.map((use, i) => (
-                <Badge key={i} variant="outline" className="text-xs">
-                  <Target className="w-3 h-3 mr-1" />
-                  {use}
-                </Badge>
-              ))}
+              <div className="flex flex-wrap gap-2">
+                {alternative.bestFor.map((use, i) => (
+                  <Badge key={i} variant="outline" className="text-xs bg-background/50">
+                    <Target className="w-3 h-3 mr-1 opacity-70" />
+                    {use}
+                  </Badge>
+                ))}
+              </div>
+
+              {alternative.url && (
+                <div className="pt-2">
+                  <Button
+                    variant="link"
+                    className="h-auto p-0 text-xs text-muted-foreground hover:text-primary"
+                    onClick={() => window.open(alternative.url, '_blank')}
+                  >
+                    View Product <ExternalLink className="w-3 h-3 ml-1" />
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </div>

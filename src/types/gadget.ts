@@ -71,6 +71,7 @@ export interface AIAlternative {
   whyBetter: string[];
   bestFor: string[];
   upgradeScore: number;
+  url?: string;
 }
 
 export interface CategoryStats {
@@ -157,8 +158,11 @@ export const getConditionLabel = (condition: GadgetCondition): string => {
     good: 'Good',
     okay: 'Okay',
     bad: 'Bad',
+    first: 'First',
+    second: 'Second',
+    third: 'Third',
   };
-  return labels[condition];
+  return labels[condition] || condition;
 };
 
 export const getWarrantyStatus = (warrantyExpiry: string | null): 'active' | 'expired' | 'expiring' | 'none' => {
