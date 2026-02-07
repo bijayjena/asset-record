@@ -7,7 +7,7 @@ export const fetchGadgets = async (): Promise<Gadget[]> => {
     .from('gadgets')
     .select('*')
     .order('created_at', { ascending: false });
-  
+
   if (error) throw error;
   return (data || []) as Gadget[];
 };
@@ -18,7 +18,7 @@ export const fetchGadgetById = async (id: string): Promise<Gadget | null> => {
     .select('*')
     .eq('id', id)
     .single();
-  
+
   if (error) {
     if (error.code === 'PGRST116') return null;
     throw error;
@@ -31,12 +31,12 @@ export const searchGadgetImage = async (name: string, brand: string, category: s
     const { data, error } = await supabase.functions.invoke('search-gadget-image', {
       body: { name, brand, category }
     });
-    
+
     if (error) {
       console.error('Error searching for gadget image:', error);
       return null;
     }
-    
+
     return data?.imageUrl || null;
   } catch (err) {
     console.error('Failed to search gadget image:', err);
@@ -52,17 +52,17 @@ export const uploadGadgetImage = async (
   const fileExt = file.name.split('.').pop();
   const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
   const filePath = `${userId}/gadget-images/${gadgetId}/${fileName}`;
-  
+
   const { error: uploadError } = await supabase.storage
     .from('gadget-attachments')
     .upload(filePath, file);
-  
+
   if (uploadError) throw uploadError;
-  
+
   const { data: urlData } = supabase.storage
     .from('gadget-attachments')
     .getPublicUrl(filePath);
-  
+
   return urlData.publicUrl;
 };
 
@@ -88,7 +88,7 @@ export const createGadget = async (gadget: Omit<Gadget, 'id' | 'created_at' | 'u
     .insert(gadget)
     .select()
     .single();
-  
+
   if (error) throw error;
   return data as Gadget;
 };
@@ -100,7 +100,7 @@ export const updateGadget = async (id: string, updates: Partial<Gadget>): Promis
     .eq('id', id)
     .select()
     .single();
-  
+
   if (error) throw error;
   return data as Gadget;
 };
@@ -110,7 +110,7 @@ export const deleteGadget = async (id: string): Promise<void> => {
     .from('gadgets')
     .delete()
     .eq('id', id);
-  
+
   if (error) throw error;
 };
 
@@ -121,7 +121,7 @@ export const fetchAttachments = async (gadgetId: string): Promise<Attachment[]> 
     .select('*')
     .eq('gadget_id', gadgetId)
     .order('uploaded_at', { ascending: false });
-  
+
   if (error) throw error;
   return (data || []) as Attachment[];
 };
@@ -136,18 +136,18 @@ export const uploadAttachment = async (
   const fileExt = file.name.split('.').pop();
   const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
   const filePath = `${userId}/${gadgetId}/${fileName}`;
-  
+
   const { error: uploadError } = await supabase.storage
     .from('gadget-attachments')
     .upload(filePath, file);
-  
+
   if (uploadError) throw uploadError;
-  
+
   // Get public URL
   const { data: urlData } = supabase.storage
     .from('gadget-attachments')
     .getPublicUrl(filePath);
-  
+
   // Create attachment record
   const { data, error } = await supabase
     .from('attachments')
@@ -161,7 +161,7 @@ export const uploadAttachment = async (
     })
     .select()
     .single();
-  
+
   if (error) throw error;
   return data as Attachment;
 };
@@ -173,19 +173,19 @@ export const deleteAttachment = async (attachment: Attachment, userId: string): 
   const bucketIndex = pathParts.indexOf('gadget-attachments');
   if (bucketIndex !== -1) {
     const filePath = pathParts.slice(bucketIndex + 1).join('/');
-    
+
     // Delete from storage
     await supabase.storage
       .from('gadget-attachments')
       .remove([filePath]);
   }
-  
+
   // Delete record
   const { error } = await supabase
     .from('attachments')
     .delete()
     .eq('id', attachment.id);
-  
+
   if (error) throw error;
 };
 
@@ -198,7 +198,7 @@ export const fetchAISuggestion = async (gadgetId: string): Promise<AISuggestion 
     .order('created_at', { ascending: false })
     .limit(1)
     .single();
-  
+
   if (error) {
     if (error.code === 'PGRST116') return null;
     throw error;
@@ -212,17 +212,18 @@ export const saveAISuggestion = async (gadgetId: string, responseJson: object): 
     .from('ai_suggestions')
     .delete()
     .eq('gadget_id', gadgetId);
-  
+
   // Insert new suggestion
   const { data, error } = await supabase
     .from('ai_suggestions')
     .insert({
       gadget_id: gadgetId,
       response_json: responseJson,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any)
     .select()
     .single();
-  
+
   if (error) throw error;
   return data as unknown as AISuggestion;
 };
@@ -270,10 +271,10 @@ export const seedDemoGadgets = async (userId: string): Promise<void> => {
       notes: 'Daily use for calls and music',
     },
   ];
-  
+
   const { error } = await supabase
     .from('gadgets')
     .insert(demoGadgets);
-  
+
   if (error) console.error('Error seeding demo gadgets:', error);
 };

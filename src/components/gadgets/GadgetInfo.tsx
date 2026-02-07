@@ -1,7 +1,7 @@
 import { Gadget, formatAge, getCategoryLabel, getCategoryIcon, getConditionLabel, getWarrantyStatus } from '@/types/gadget';
 import { Badge } from '@/components/ui/badge';
 import { format, parseISO } from 'date-fns';
-import { 
+import {
   Calendar,
   DollarSign,
   Store,
@@ -22,7 +22,7 @@ export const GadgetInfo = ({ gadget }: GadgetInfoProps) => {
   const { profile } = useProfile();
   const currency = profile?.currency || 'INR';
   const warrantyStatus = getWarrantyStatus(gadget.warranty_expiry);
-  
+
   const getWarrantyBadge = () => {
     switch (warrantyStatus) {
       case 'active':
@@ -46,7 +46,7 @@ export const GadgetInfo = ({ gadget }: GadgetInfoProps) => {
     return <Badge className={colors[gadget.condition]}>{getConditionLabel(gadget.condition)}</Badge>;
   };
 
-  const InfoRow = ({ icon: Icon, label, value }: { icon: any; label: string; value: React.ReactNode }) => (
+  const InfoRow = ({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: React.ReactNode }) => (
     <div className="flex items-start gap-3 py-3 border-b border-border/30 last:border-0">
       <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
         <Icon className="w-4 h-4 text-primary" />
@@ -60,49 +60,49 @@ export const GadgetInfo = ({ gadget }: GadgetInfoProps) => {
 
   return (
     <div className="space-y-1">
-      <InfoRow 
-        icon={Tag} 
-        label="Category" 
+      <InfoRow
+        icon={Tag}
+        label="Category"
         value={
           <span className="flex items-center gap-2">
             <span>{getCategoryIcon(gadget.category)}</span>
             {getCategoryLabel(gadget.category)}
           </span>
-        } 
+        }
       />
-      <InfoRow 
-        icon={Clock} 
-        label="Age" 
-        value={formatAge(gadget.purchase_date)} 
+      <InfoRow
+        icon={Clock}
+        label="Age"
+        value={formatAge(gadget.purchase_date)}
       />
-      <InfoRow 
-        icon={Calendar} 
-        label="Purchase Date" 
-        value={format(parseISO(gadget.purchase_date), 'MMMM d, yyyy')} 
+      <InfoRow
+        icon={Calendar}
+        label="Purchase Date"
+        value={format(parseISO(gadget.purchase_date), 'MMMM d, yyyy')}
       />
-      <InfoRow 
-        icon={DollarSign} 
-        label="Price Paid" 
-        value={gadget.price_paid ? formatPrice(gadget.price_paid, currency) : null} 
+      <InfoRow
+        icon={DollarSign}
+        label="Price Paid"
+        value={gadget.price_paid ? formatPrice(gadget.price_paid, currency) : null}
       />
-      <InfoRow 
-        icon={Store} 
-        label="Vendor" 
-        value={gadget.vendor_name} 
+      <InfoRow
+        icon={Store}
+        label="Vendor"
+        value={gadget.vendor_name}
       />
-      <InfoRow 
-        icon={Hash} 
-        label="Order ID" 
-        value={gadget.order_id} 
+      <InfoRow
+        icon={Hash}
+        label="Order ID"
+        value={gadget.order_id}
       />
-      <InfoRow 
-        icon={Hash} 
-        label="Serial Number" 
-        value={gadget.serial_number} 
+      <InfoRow
+        icon={Hash}
+        label="Serial Number"
+        value={gadget.serial_number}
       />
-      <InfoRow 
-        icon={Shield} 
-        label="Warranty" 
+      <InfoRow
+        icon={Shield}
+        label="Warranty"
         value={
           <div className="flex items-center gap-2">
             {getWarrantyBadge()}
@@ -112,18 +112,18 @@ export const GadgetInfo = ({ gadget }: GadgetInfoProps) => {
               </span>
             )}
           </div>
-        } 
+        }
       />
-      <InfoRow 
-        icon={Tag} 
-        label="Condition" 
-        value={getConditionBadge()} 
+      <InfoRow
+        icon={Tag}
+        label="Condition"
+        value={getConditionBadge()}
       />
       {gadget.notes && (
-        <InfoRow 
-          icon={FileText} 
-          label="Notes" 
-          value={<p className="text-sm whitespace-pre-wrap">{gadget.notes}</p>} 
+        <InfoRow
+          icon={FileText}
+          label="Notes"
+          value={<p className="text-sm whitespace-pre-wrap">{gadget.notes}</p>}
         />
       )}
     </div>
