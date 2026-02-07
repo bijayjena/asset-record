@@ -1,10 +1,10 @@
 {
   "name": "asset-record",
   "private": true,
-  "version": "0.0.2",
+  "version": "0.0.3",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "start": "vite",
     "build": "npm version patch --no-git-tag-version && vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
