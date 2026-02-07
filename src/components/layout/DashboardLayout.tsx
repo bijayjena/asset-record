@@ -145,9 +145,11 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
       {/* Footer */}
       <footer className="py-6 border-t border-border/50 bg-background/50 backdrop-blur-sm mt-auto">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between text-xs text-muted-foreground">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
           <p>© {new Date().getFullYear()} AssetRecord. All rights reserved.</p>
           <div className="flex items-center gap-4">
+            <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
+            <Link to="/terms" className="hover:text-foreground transition-colors">Terms and Conditions</Link>
             <p>v{import.meta.env.PACKAGE_VERSION || '0.0.1'}</p>
           </div>
         </div>

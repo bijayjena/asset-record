@@ -13,6 +13,8 @@ import NewGadget from "./pages/NewGadget";
 import GadgetDetails from "./pages/GadgetDetails";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsAndConditions from "./pages/TermsAndConditions";
 
 const queryClient = new QueryClient();
 
@@ -59,6 +61,8 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<TermsAndConditions />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

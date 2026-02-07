@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
@@ -39,10 +39,10 @@ const Auth = () => {
   }, [user, navigate]);
 
   const validateForm = () => {
-    const formData = isLogin 
+    const formData = isLogin
       ? { email, password }
       : { email, password, fullName, currency };
-    
+
     const result = authSchema.safeParse(formData);
     if (!result.success) {
       const fieldErrors: { email?: string; password?: string; fullName?: string } = {};
@@ -54,13 +54,13 @@ const Auth = () => {
       setErrors(fieldErrors);
       return false;
     }
-    
+
     // Additional validation for sign up
     if (!isLogin && !fullName.trim()) {
       setErrors({ fullName: 'Full name is required' });
       return false;
     }
-    
+
     setErrors({});
     return true;
   };
@@ -105,12 +105,12 @@ const Auth = () => {
                 currency: currency,
                 onboarding_completed: false,
               });
-            
+
             if (profileError) {
               console.error('Profile creation error:', profileError);
             }
           }
-          
+
           toast.success('Account created! Welcome to AssetRecord.');
           navigate('/dashboard');
         }
@@ -164,8 +164,10 @@ const Auth = () => {
           </div>
         </div>
 
-        <div className="relative z-10 text-sm text-muted-foreground">
-          © 2024 AssetRecord. All rights reserved.
+        <div className="relative z-10 text-sm text-muted-foreground flex gap-4">
+          <span>© {new Date().getFullYear()} AssetRecord.</span>
+          <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy</Link>
+          <Link to="/terms" className="hover:text-foreground transition-colors">Terms</Link>
         </div>
       </div>
 
@@ -295,6 +297,20 @@ const Auth = () => {
                   </>
                 )}
               </Button>
+
+              {!isLogin && (
+                <div className="text-xs text-center text-muted-foreground mt-2">
+                  By creating an account, you agree to our{' '}
+                  <Link to="/terms" className="underline hover:text-primary transition-colors">
+                    Terms
+                  </Link>{' '}
+                  and{' '}
+                  <Link to="/privacy" className="underline hover:text-primary transition-colors">
+                    Privacy Policy
+                  </Link>
+                  .
+                </div>
+              )}
 
               <div className="relative my-4">
                 <div className="absolute inset-0 flex items-center">
