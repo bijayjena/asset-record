@@ -68,6 +68,25 @@ export interface AIResponse {
   verdict: 'Upgrade Now' | 'Wait' | 'Keep';
   summary: string;
   alternatives: AIAlternative[];
+  resellInfo?: ResellInfo;
+}
+
+export interface ResellInfo {
+  estimatedValue: {
+    min: number;
+    max: number;
+    currency: string;
+  };
+  confidence: number; // 0-100
+  platforms: ResellPlatform[];
+  lastUpdated: string;
+}
+
+export interface ResellPlatform {
+  name: string;
+  estimatedPrice: number;
+  url?: string;
+  notes?: string;
 }
 
 export interface AIAlternative {

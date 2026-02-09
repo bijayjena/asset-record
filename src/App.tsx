@@ -17,6 +17,7 @@ import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TermsAndConditions from "./pages/TermsAndConditions";
 import ForgotPassword from "./pages/ForgotPassword";
 import UpdatePassword from "./pages/UpdatePassword";
+import InvestmentPlan from "./pages/InvestmentPlan";
 
 const queryClient = new QueryClient();
 
@@ -62,6 +63,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Settings />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/investment-plan"
+              element={
+                <ProtectedRoute>
+                  <InvestmentPlan />
                 </ProtectedRoute>
               }
             />

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Gadget, AISuggestion, AIResponse, AIAlternative } from '@/types/gadget';
-import { saveAISuggestion } from '@/lib/supabase-helpers';
+import { saveAISuggestion, fetchAISuggestion } from '@/lib/supabase-helpers';
 import { useProfile } from '@/hooks/useProfile';
 import { getCurrencySymbol } from '@/lib/currency';
 import { Button } from '@/components/ui/button';
@@ -187,10 +187,17 @@ Provide 3-5 realistic alternatives.`;
         throw new Error('Invalid AI response structure');
       }
 
-      // Save to database
-      await saveAISuggestion(gadget.id, aiResponse);
+      // Fetch existing data to merge first
+      const existingData = await fetchAISuggestion(gadget.id);
+      const mergedResponse = {
+        ...(existingData?.response_json || {}),
+        ...aiResponse
+      };
 
-      setResponse(aiResponse);
+      // Save to database
+      await saveAISuggestion(gadget.id, mergedResponse);
+
+      setResponse(mergedResponse);
       setLastUpdated(new Date().toISOString());
       onSuggestionUpdate();
       toast.success('AI suggestions updated!');
@@ -274,7 +281,7 @@ Provide 3-5 realistic alternatives.`;
       </div>
 
       <AnimatePresence mode="wait">
-        {response && (
+        {response && response.verdict && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -314,7 +321,7 @@ Provide 3-5 realistic alternatives.`;
         )}
       </AnimatePresence>
 
-      {!response && !loading && (
+      {!response?.verdict && !loading && (
         <Card className="p-8 text-center bg-secondary/30 border-dashed">
           <Sparkles className="w-12 h-12 mx-auto mb-4 text-primary/50" />
           <h4 className="font-semibold mb-2">No recommendations yet</h4>

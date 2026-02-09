@@ -9,6 +9,7 @@ import { GadgetForm, GadgetFormData } from '@/components/gadgets/GadgetForm';
 import { GadgetInfo } from '@/components/gadgets/GadgetInfo';
 import { AttachmentsSection } from '@/components/gadgets/AttachmentsSection';
 import { AISuggestions } from '@/components/gadgets/AISuggestions';
+import { ResellValue } from '@/components/gadgets/ResellValue';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -46,6 +47,7 @@ import {
   X,
   Camera,
   RefreshCw,
+  DollarSign,
 } from 'lucide-react';
 import { GadgetImageUpload } from '@/components/gadgets/GadgetImageUpload';
 
@@ -412,7 +414,7 @@ const GadgetDetails = () => {
               exit={{ opacity: 0, x: 20 }}
             >
               <Tabs defaultValue="info" className="space-y-6">
-                <TabsList className="grid w-full grid-cols-3 bg-secondary/50">
+                <TabsList className="grid w-full grid-cols-4 bg-secondary/50">
                   <TabsTrigger value="info" className="gap-2">
                     <Info className="w-4 h-4" />
                     <span className="hidden sm:inline">Info</span>
@@ -429,6 +431,10 @@ const GadgetDetails = () => {
                   <TabsTrigger value="ai" className="gap-2">
                     <Sparkles className="w-4 h-4" />
                     <span className="hidden sm:inline">AI Advisor</span>
+                  </TabsTrigger>
+                  <TabsTrigger value="resell" className="gap-2">
+                    <DollarSign className="w-4 h-4" />
+                    <span className="hidden sm:inline">Value</span>
                   </TabsTrigger>
                 </TabsList>
 
@@ -453,6 +459,16 @@ const GadgetDetails = () => {
                 <TabsContent value="ai">
                   <Card className="glass-card p-6">
                     <AISuggestions
+                      gadget={gadget}
+                      cachedSuggestion={aiSuggestion || null}
+                      onSuggestionUpdate={refetchAISuggestion}
+                    />
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="resell">
+                  <Card className="glass-card p-6">
+                    <ResellValue
                       gadget={gadget}
                       cachedSuggestion={aiSuggestion || null}
                       onSuggestionUpdate={refetchAISuggestion}

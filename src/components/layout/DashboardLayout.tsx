@@ -13,12 +13,12 @@ import {
 } from '@/components/ui/dropdown-menu';
 import {
   Cpu,
-  LayoutDashboard,
   Plus,
   LogOut,
   User,
   ChevronDown,
   Settings,
+  TrendingUp,
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -38,9 +38,6 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
     navigate('/auth');
   };
 
-  const navItems = [
-    { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -59,24 +56,22 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
             </Link>
 
             {/* Center nav */}
-            <div className="hidden md:flex items-center gap-1">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = location.pathname === item.path;
-                return (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${isActive
-                      ? 'bg-primary/10 text-primary'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-secondary/50'
-                      }`}
-                  >
-                    <Icon className="w-4 h-4" />
-                    {item.label}
-                  </Link>
-                );
-              })}
+            <div className="hidden md:flex items-center gap-6">
+              <Link
+                to="/dashboard"
+                className={`text-sm font-medium transition-colors hover:text-primary ${location.pathname === '/dashboard' ? 'text-primary' : 'text-muted-foreground'
+                  }`}
+              >
+                Dashboard
+              </Link>
+              <Link
+                to="/investment-plan"
+                className={`text-sm font-medium transition-colors hover:text-primary flex items-center gap-2 ${location.pathname === '/investment-plan' ? 'text-primary' : 'text-muted-foreground'
+                  }`}
+              >
+                <TrendingUp className="w-4 h-4" />
+                Investment Plan
+              </Link>
             </div>
 
             {/* Right side */}
