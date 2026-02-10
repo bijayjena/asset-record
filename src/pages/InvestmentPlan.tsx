@@ -29,6 +29,7 @@ import {
 } from 'lucide-react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import { toast } from 'sonner';
+import { SEO } from '@/components/SEO';
 
 interface Allocation {
     category: string;
@@ -184,6 +185,7 @@ const InvestmentPlan = () => {
 
     return (
         <DashboardLayout>
+            <SEO title="Investment Plan" description="AI-powered investment advice and planning." />
             <div className="space-y-8 max-w-6xl mx-auto">
                 <motion.div
                     initial={{ opacity: 0, y: -20 }}
@@ -220,9 +222,9 @@ const InvestmentPlan = () => {
                                     <Label>Monthly Savings</Label>
                                     <div className="relative">
                                         <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                                        <Input 
-                                            placeholder="Eg. 5000" 
-                                            className="pl-9" 
+                                        <Input
+                                            placeholder="Eg. 5000"
+                                            className="pl-9"
                                             value={monthlySavings}
                                             onChange={(e) => setMonthlySavings(e.target.value)}
                                             type="number"
@@ -246,8 +248,8 @@ const InvestmentPlan = () => {
                                     <Label>Financial Goal</Label>
                                     <div className="relative">
                                         <Target className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                                        <Input 
-                                            placeholder="Eg. Buy a house in 5 years" 
+                                        <Input
+                                            placeholder="Eg. Buy a house in 5 years"
                                             className="pl-9"
                                             value={financialGoal}
                                             onChange={(e) => setFinancialGoal(e.target.value)}
@@ -256,9 +258,9 @@ const InvestmentPlan = () => {
                                 </div>
                             </div>
 
-                            <Button 
-                                onClick={generateAIPlan} 
-                                disabled={loading} 
+                            <Button
+                                onClick={generateAIPlan}
+                                disabled={loading}
                                 className="w-full md:w-auto btn-gradient text-primary-foreground min-w-[200px]"
                             >
                                 {loading ? (
@@ -297,7 +299,7 @@ const InvestmentPlan = () => {
                                                 </h3>
                                                 <p className="text-muted-foreground mt-2">{plan.summary}</p>
                                             </div>
-                                            
+
                                             <div className="space-y-3">
                                                 {plan.allocations.map((alloc, idx) => (
                                                     <div key={idx} className="bg-card/50 p-4 rounded-lg border border-border/50">
@@ -383,14 +385,13 @@ const InvestmentPlan = () => {
                                     <CardDescription className="text-sm font-medium">
                                         {strategy.description}
                                     </CardDescription>
-                                    
+
                                     <div className="grid grid-cols-2 gap-4 text-sm">
                                         <div className="flex flex-col">
                                             <span className="text-muted-foreground text-xs">Risk Level</span>
-                                            <span className={`font-semibold ${
-                                                strategy.risk.includes('High') ? 'text-destructive' : 
-                                                strategy.risk.includes('Medium') ? 'text-yellow-600' : 'text-green-600'
-                                            }`}>
+                                            <span className={`font-semibold ${strategy.risk.includes('High') ? 'text-destructive' :
+                                                    strategy.risk.includes('Medium') ? 'text-yellow-600' : 'text-green-600'
+                                                }`}>
                                                 {strategy.risk}
                                             </span>
                                         </div>
@@ -412,7 +413,7 @@ const InvestmentPlan = () => {
                 </div>
 
                 {/* Action Plan */}
-                <motion.div 
+                <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.8 }}
@@ -422,7 +423,7 @@ const InvestmentPlan = () => {
                         <div className="space-y-2">
                             <h3 className="text-xl font-semibold">Start Your Wealth Journey</h3>
                             <p className="text-muted-foreground max-w-2xl">
-                                The best time to start investing was yesterday. The second best time is today. 
+                                The best time to start investing was yesterday. The second best time is today.
                                 Begin by creating an emergency fund, then diversify based on your risk appetite.
                             </p>
                         </div>

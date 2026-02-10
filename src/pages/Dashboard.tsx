@@ -37,6 +37,7 @@ import {
   ToggleRight,
   Download,
 } from 'lucide-react';
+import { SEO } from '@/components/SEO';
 
 const CATEGORY_OPTIONS: GadgetCategory[] = [
   'phone', 'laptop', 'tablet', 'watch', 'headphones',
@@ -167,6 +168,7 @@ const Dashboard = () => {
 
   return (
     <DashboardLayout>
+      <SEO title="Dashboard" description="Overview of your asset collection" />
       <div className="space-y-8">
         {/* Header */}
         <div>

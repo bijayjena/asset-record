@@ -11,6 +11,7 @@ import { Eye, EyeOff, Mail, Lock, Cpu, ArrowRight, Github, User } from 'lucide-r
 import { z } from 'zod';
 import { CURRENCIES, type Currency } from '@/lib/currency';
 import { supabase } from '@/integrations/supabase/client';
+import { SEO } from '@/components/SEO';
 
 const authSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -124,6 +125,10 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen flex">
+      <SEO
+        title={isLogin ? "Sign In" : "Sign Up"}
+        description="Login or create an account to manage your assets."
+      />
       {/* Left side - Branding */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary/20 via-background to-background p-12 flex-col justify-between relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent" />

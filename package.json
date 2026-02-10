@@ -1,13 +1,12 @@
 {
   "name": "asset-record",
   "private": true,
-  "version": "0.0.7",
+  "version": "0.0.8",
   "type": "module",
   "scripts": {
     "start": "vite",
     "build": "npm version patch --no-git-tag-version && vite build",
     "build:dev": "vite build --mode development",
-    "postbuild": "node generate-redirects.js",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
@@ -56,6 +55,7 @@
     "react": "^18.3.1",
     "react-day-picker": "^8.10.1",
     "react-dom": "^18.3.1",
+    "react-helmet-async": "^2.0.5",
     "react-hook-form": "^7.61.1",
     "react-resizable-panels": "^2.1.9",
     "react-router-dom": "^6.30.1",

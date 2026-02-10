@@ -39,10 +39,13 @@ import {
   CalendarIcon,
   Save,
   Loader2,
+  Sparkles,
+  RefreshCw,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Info } from 'lucide-react';
+import { SEO } from '@/components/SEO';
 
 const CATEGORIES: GadgetCategory[] = [
   'phone', 'laptop', 'tablet', 'watch', 'headphones',
@@ -74,6 +77,8 @@ const NewGadget = () => {
   const [serialNumber, setSerialNumber] = useState('');
   const [notes, setNotes] = useState('');
   const [customImageFile, setCustomImageFile] = useState<File | null>(null);
+  const [autoFetchedImage, setAutoFetchedImage] = useState<string | null>(null);
+  const [isSearchingImage, setIsSearchingImage] = useState(false);
 
   // New Fields
   const [ownershipType, setOwnershipType] = useState<OwnershipType>('first_hand');
@@ -85,6 +90,29 @@ const NewGadget = () => {
       navigate('/auth');
     }
   }, [authLoading, user, navigate]);
+
+  const handleAutoFetchImage = async () => {
+    if (!name.trim() || !brand.trim()) {
+      toast.error('Please enter Name and Brand first');
+      return;
+    }
+
+    setIsSearchingImage(true);
+    try {
+      const url = await searchGadgetImage(name.trim(), brand.trim(), category);
+      if (url) {
+        setAutoFetchedImage(url);
+        toast.success('Image found!');
+      } else {
+        toast.error('No image found');
+      }
+    } catch (error) {
+      console.error('Error fetching image:', error);
+      toast.error('Failed to fetch image');
+    } finally {
+      setIsSearchingImage(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -145,8 +173,10 @@ const NewGadget = () => {
           console.error('Failed to upload custom image:', err);
           toast.error('Failed to upload image, but asset was created');
         }
+      } else if (autoFetchedImage) {
+        imageUrl = autoFetchedImage;
       } else {
-        // Auto-fetch from Google
+        // Auto-fetch from Google if not already fetched
         imageUrl = await searchGadgetImage(name.trim(), brand.trim(), category);
       }
 
@@ -189,6 +219,7 @@ const NewGadget = () => {
 
   return (
     <DashboardLayout>
+      <SEO title="Add New Asset" description="Add a new asset to your collection." />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -214,14 +245,33 @@ const NewGadget = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Image Upload */}
             <div className="space-y-2">
-              <Label>Asset Image</Label>
+              <div className="flex items-center justify-between">
+                <Label>Asset Image</Label>
+                {(name.trim() && brand.trim()) && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleAutoFetchImage}
+                    disabled={isSearchingImage}
+                    className="h-7 text-xs gap-1 bg-secondary/50 hover:bg-secondary border-primary/20"
+                  >
+                    {isSearchingImage ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : (
+                      <Sparkles className="w-3 h-3 text-yellow-500" />
+                    )}
+                    Auto-Find Image
+                  </Button>
+                )}
+              </div>
               <GadgetImageUpload
-                currentImageUrl={null}
+                currentImageUrl={autoFetchedImage}
                 categoryIcon={getCategoryIcon(category)}
                 onImageChange={setCustomImageFile}
               />
-              <p className="text-xs text-muted-foreground">
-                Upload a custom image or leave empty to auto-fetch from the web
+              <p className="text-xs text-muted-foreground ml-1">
+                Upload a custom image or click Auto-Find to fetch from web
               </p>
             </div>
             {/* Category & Condition Row */}

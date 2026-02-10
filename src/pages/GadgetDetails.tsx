@@ -50,6 +50,7 @@ import {
   DollarSign,
 } from 'lucide-react';
 import { GadgetImageUpload } from '@/components/gadgets/GadgetImageUpload';
+import { SEO } from '@/components/SEO';
 
 const GadgetDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -260,6 +261,10 @@ const GadgetDetails = () => {
 
   return (
     <DashboardLayout>
+      <SEO
+        title={gadget.name}
+        description={`Details for ${gadget.name} - ${gadget.brand}`}
+      />
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

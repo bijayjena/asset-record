@@ -13,7 +13,7 @@ serve(async (req) => {
 
   try {
     const { name, brand, category } = await req.json();
-    
+
     if (!name || !brand) {
       return new Response(
         JSON.stringify({ error: 'Name and brand are required' }),
@@ -41,7 +41,13 @@ serve(async (req) => {
     }
 
     // Build search query with gadget details
-    const searchQuery = `${brand} ${name} ${category || ''} product`.trim();
+    let searchQuery = `${brand} ${name} ${category || ''} product`.trim();
+
+    // optimize for phones to get cleaner product shots
+    if (category === 'phone') {
+      searchQuery = `${brand} ${name} official commercial white background`.trim();
+    }
+
     console.log('Searching for image:', searchQuery);
 
     // Google Custom Search API for images
@@ -55,7 +61,7 @@ serve(async (req) => {
     searchUrl.searchParams.set('imgSize', 'large');
 
     const response = await fetch(searchUrl.toString());
-    
+
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Google API error:', response.status, errorText);
@@ -70,7 +76,7 @@ serve(async (req) => {
 
     // Extract the first image URL
     const imageUrl = data.items?.[0]?.link || null;
-    
+
     if (!imageUrl) {
       console.log('No image found for query:', searchQuery);
       return new Response(
