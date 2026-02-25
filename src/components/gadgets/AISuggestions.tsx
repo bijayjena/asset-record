@@ -73,6 +73,7 @@ export const AISuggestions = ({
   const [budgetMin, setBudgetMin] = useState<string>('');
   const [budgetMax, setBudgetMax] = useState<string>('');
   const [issues, setIssues] = useState<string>('');
+  const [userNeeds, setUserNeeds] = useState<string>('');
 
   useEffect(() => {
     // Pre-fill age if available
@@ -126,6 +127,9 @@ export const AISuggestions = ({
       let constraintText = `Budget Range: ${budgetMin ? currencySymbol + budgetMin + ' - ' : ''}${currencySymbol}${budgetMax}.`;
       if (issues) {
         constraintText += `\nCurrent Issues Faced: ${issues}. Prioritize alternatives that solve these issues.`;
+      }
+      if (userNeeds) {
+        constraintText += `\nUser Requirements: ${userNeeds}. Ensure alternatives meet these specific needs and preferences.`;
       }
 
       const prompt = `${userContext}
@@ -401,6 +405,20 @@ Provide 3-5 realistic alternatives.`;
                 onChange={(e) => setIssues(e.target.value)}
                 className="h-20 resize-none"
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="userNeeds">What do you need? (Optional)</Label>
+              <Textarea
+                id="userNeeds"
+                placeholder="e.g. Better camera for photography, longer battery life, gaming performance, lightweight for travel..."
+                value={userNeeds}
+                onChange={(e) => setUserNeeds(e.target.value)}
+                className="h-20 resize-none"
+              />
+              <p className="text-xs text-muted-foreground">
+                Describe your specific requirements to get more personalized recommendations
+              </p>
             </div>
           </div>
 

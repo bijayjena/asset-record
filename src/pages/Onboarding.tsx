@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -23,6 +23,35 @@ const Onboarding = () => {
   const [wantsTutorial, setWantsTutorial] = useState(false);
   const [wantsDemoData, setWantsDemoData] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Prefill data from OAuth metadata or existing profile
+  useEffect(() => {
+    const loadUserData = async () => {
+      if (!user) return;
+
+      // Try to get existing profile data first
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name, age')
+        .eq('user_id', user.id)
+        .single();
+
+      if (profile?.full_name) {
+        setFullName(profile.full_name);
+      } else if (user.user_metadata) {
+        // Fallback to OAuth metadata
+        const metadata = user.user_metadata;
+        const name = metadata.full_name || metadata.name || '';
+        if (name) setFullName(name);
+      }
+
+      if (profile?.age) {
+        setAge(profile.age.toString());
+      }
+    };
+
+    loadUserData();
+  }, [user]);
 
   const handleProfileSubmit = () => {
     if (!fullName.trim()) {

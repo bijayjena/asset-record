@@ -1,6 +1,7 @@
 import { useAuth } from './useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import type { Currency } from '@/lib/currency';
+import { detectCurrencyFromLocation } from '@/lib/location-currency';
 import { useQuery } from '@tanstack/react-query';
 
 export interface Profile {
@@ -34,9 +35,14 @@ export const useProfile = () => {
       if (error) {
         // Profile doesn't exist, create one
         if (error.code === 'PGRST116') {
+          const detectedCurrency = await detectCurrencyFromLocation();
+          
           const { data: newProfile, error: createError } = await supabase
             .from('profiles')
-            .insert({ user_id: user.id })
+            .insert({ 
+              user_id: user.id,
+              currency: detectedCurrency,
+            })
             .select()
             .single();
 

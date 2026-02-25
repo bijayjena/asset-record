@@ -2,6 +2,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { detectCurrencyFromLocation } from '@/lib/location-currency';
 
 interface AuthContextType {
   user: User | null;
@@ -25,12 +26,33 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
 
+        // Handle OAuth sign-in - create profile if it doesn't exist
+        if (event === 'SIGNED_IN' && session?.user) {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('user_id', session.user.id)
+            .single();
 
+          // If no profile exists, create one with OAuth metadata and location-based currency
+          if (!profile) {
+            const metadata = session.user.user_metadata;
+            const detectedCurrency = await detectCurrencyFromLocation();
+            
+            await supabase.from('profiles').insert({
+              user_id: session.user.id,
+              full_name: metadata.full_name || metadata.name || '',
+              avatar_url: metadata.avatar_url || metadata.picture || '',
+              currency: detectedCurrency,
+              onboarding_completed: false,
+            });
+          }
+        }
       }
     );
 

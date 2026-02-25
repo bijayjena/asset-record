@@ -223,7 +223,13 @@ const DashboardStats = ({ gadgets }: DashboardStatsProps) => {
             <div className="h-64">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={stats.categoryData} layout="vertical">
-                  <XAxis type="number" hide />
+                  <XAxis 
+                    type="number" 
+                    tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+                    axisLine={false}
+                    tickLine={false}
+                    tickFormatter={(value) => formatAgeDisplay(value)}
+                  />
                   <YAxis
                     type="category"
                     dataKey="category"
@@ -240,7 +246,7 @@ const DashboardStats = ({ gadgets }: DashboardStatsProps) => {
                           <div className="glass-card rounded-lg px-3 py-2 text-sm">
                             <p className="font-medium">{data.icon} {data.category}</p>
                             <p className="text-muted-foreground">
-                              {data.count} asset{data.count !== 1 ? 's' : ''} • Avg: {formatAgeDisplay(data.avgAge)}
+                              {data.count} asset{data.count !== 1 ? 's' : ''} • Avg Age: {formatAgeDisplay(data.avgAge)}
                             </p>
                           </div>
                         );
@@ -248,7 +254,7 @@ const DashboardStats = ({ gadgets }: DashboardStatsProps) => {
                       return null;
                     }}
                   />
-                  <Bar dataKey="count" radius={[0, 4, 4, 0]}>
+                  <Bar dataKey="avgAge" radius={[0, 4, 4, 0]}>
                     {stats.categoryData.map((_, index) => (
                       <Cell
                         key={`cell-${index}`}

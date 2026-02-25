@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { Eye, EyeOff, Mail, Lock, Cpu, ArrowRight, Github, User } from 'lucide-react';
 import { z } from 'zod';
 import { CURRENCIES, type Currency } from '@/lib/currency';
+import { detectCurrencyFromLocation } from '@/lib/location-currency';
 import { supabase } from '@/integrations/supabase/client';
 import { SEO } from '@/components/SEO';
 
@@ -26,6 +27,7 @@ const Auth = () => {
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [currency, setCurrency] = useState<Currency>('INR');
+  const [currencyDetecting, setCurrencyDetecting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string; fullName?: string }>({});
@@ -38,6 +40,17 @@ const Auth = () => {
       navigate('/dashboard');
     }
   }, [user, navigate]);
+
+  // Detect currency based on location when switching to signup
+  useEffect(() => {
+    if (!isLogin && currency === 'INR' && !currencyDetecting) {
+      setCurrencyDetecting(true);
+      detectCurrencyFromLocation().then((detectedCurrency) => {
+        setCurrency(detectedCurrency);
+        setCurrencyDetecting(false);
+      });
+    }
+  }, [isLogin, currency, currencyDetecting]);
 
   const validateForm = () => {
     const formData = isLogin
