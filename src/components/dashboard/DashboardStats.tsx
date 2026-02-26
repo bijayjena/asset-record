@@ -28,9 +28,10 @@ import {
 
 interface DashboardStatsProps {
   gadgets: Gadget[];
+  globalAverages?: Record<GadgetCategory, number>;
 }
 
-const DashboardStats = ({ gadgets }: DashboardStatsProps) => {
+const DashboardStats = ({ gadgets, globalAverages }: DashboardStatsProps) => {
   const stats = useMemo(() => {
     if (gadgets.length === 0) {
       return {
@@ -39,6 +40,7 @@ const DashboardStats = ({ gadgets }: DashboardStatsProps) => {
         oldestGadget: null as Gadget | null,
         expiringWarranties: [] as Gadget[],
         categoryData: [] as { category: string; count: number; avgAge: number }[],
+        deviceAgeData: [] as { name: string; actualAge: number; averageAge: number; category: GadgetCategory }[],
       };
     }
 
@@ -81,14 +83,26 @@ const DashboardStats = ({ gadgets }: DashboardStatsProps) => {
       }))
       .sort((a, b) => b.count - a.count);
 
+    // Device age data for the chart (individual devices with actual vs average age)
+    const deviceAgeData = gadgetsWithAge
+      .map((g) => ({
+        name: g.name,
+        actualAge: g.ageMonths,
+        averageAge: globalAverages?.[g.category] || 0,
+        category: g.category,
+      }))
+      .sort((a, b) => b.actualAge - a.actualAge)
+      .slice(0, 10); // Show top 10 devices
+
     return {
       totalGadgets: gadgets.length,
       averageAge: Math.round(averageAge),
       oldestGadget,
       expiringWarranties,
       categoryData,
+      deviceAgeData,
     };
-  }, [gadgets]);
+  }, [gadgets, globalAverages]);
 
   const formatAgeDisplay = (months: number) => {
     if (months < 12) return `${months}mo`;
@@ -202,8 +216,8 @@ const DashboardStats = ({ gadgets }: DashboardStatsProps) => {
         </motion.div>
       </div>
 
-      {/* Category chart */}
-      {stats.categoryData.length > 0 && (
+      {/* Device age comparison chart */}
+      {stats.deviceAgeData.length > 0 && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -215,28 +229,45 @@ const DashboardStats = ({ gadgets }: DashboardStatsProps) => {
                 <BarChart3 className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <h3 className="font-semibold">Assets by Category</h3>
-                <p className="text-sm text-muted-foreground">Distribution and average age</p>
+                <h3 className="font-semibold">Asset Age Comparison</h3>
+                <p className="text-sm text-muted-foreground">Actual age vs. typical ownership duration</p>
               </div>
             </div>
 
-            <div className="h-64">
+            <div className="flex items-center gap-4 mb-4 text-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded" style={{ backgroundColor: 'hsl(var(--primary))' }}></div>
+                <span className="text-muted-foreground">Your Asset Age</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 rounded" style={{ backgroundColor: 'hsl(var(--gv-info))' }}></div>
+                <span className="text-muted-foreground">Typical Ownership</span>
+              </div>
+            </div>
+
+            <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={stats.categoryData} layout="vertical">
-                  <XAxis 
-                    type="number" 
+                <BarChart data={stats.deviceAgeData}>
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 11 }}
+                    axisLine={false}
+                    tickLine={false}
+                    angle={-45}
+                    textAnchor="end"
+                    height={80}
+                  />
+                  <YAxis
                     tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
                     axisLine={false}
                     tickLine={false}
                     tickFormatter={(value) => formatAgeDisplay(value)}
-                  />
-                  <YAxis
-                    type="category"
-                    dataKey="category"
-                    width={100}
-                    tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
-                    axisLine={false}
-                    tickLine={false}
+                    label={{ 
+                      value: 'Age', 
+                      angle: -90, 
+                      position: 'insideLeft',
+                      style: { fill: 'hsl(var(--muted-foreground))', fontSize: 12 }
+                    }}
                   />
                   <Tooltip
                     content={({ active, payload }) => {
@@ -244,9 +275,12 @@ const DashboardStats = ({ gadgets }: DashboardStatsProps) => {
                         const data = payload[0].payload;
                         return (
                           <div className="glass-card rounded-lg px-3 py-2 text-sm">
-                            <p className="font-medium">{data.icon} {data.category}</p>
-                            <p className="text-muted-foreground">
-                              {data.count} asset{data.count !== 1 ? 's' : ''} • Avg Age: {formatAgeDisplay(data.avgAge)}
+                            <p className="font-medium mb-1">{data.name}</p>
+                            <p className="text-primary">
+                              Your Asset: {formatAgeDisplay(data.actualAge)}
+                            </p>
+                            <p className="text-gv-info">
+                              Typical: {formatAgeDisplay(data.averageAge)}
                             </p>
                           </div>
                         );
@@ -254,15 +288,8 @@ const DashboardStats = ({ gadgets }: DashboardStatsProps) => {
                       return null;
                     }}
                   />
-                  <Bar dataKey="avgAge" radius={[0, 4, 4, 0]}>
-                    {stats.categoryData.map((_, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={chartColors[index % chartColors.length]}
-                        opacity={0.8}
-                      />
-                    ))}
-                  </Bar>
+                  <Bar dataKey="actualAge" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="averageAge" fill="hsl(var(--gv-info))" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>

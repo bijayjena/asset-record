@@ -179,7 +179,7 @@ const Dashboard = () => {
         </div>
 
         {/* Stats */}
-        <DashboardStats gadgets={gadgets} />
+        <DashboardStats gadgets={gadgets} globalAverages={GLOBAL_AVERAGES} />
 
         {/* Gadgets Grid Section */}
         <div className="space-y-4">
